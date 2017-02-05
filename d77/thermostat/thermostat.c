@@ -1,32 +1,32 @@
-//при сборке добавить 9 настроек ,переменных 0 
-//при отрыве  и других проблем с датчиками,работает по сохраненной температуре,ограничил время такой работы одной минутой.кнопкой принять сохраняются настройки,кнопка режим.режим работы гпио- постоянно выкл,постоянно вкл,,охладитель.термостат.настройки на главной модуля
+//РїСЂРё СЃР±РѕСЂРєРµ РґРѕР±Р°РІРёС‚СЊ 9 РЅР°СЃС‚СЂРѕРµРє ,РїРµСЂРµРјРµРЅРЅС‹С… 0 
+//РїСЂРё РѕС‚СЂС‹РІРµ  Рё РґСЂСѓРіРёС… РїСЂРѕР±Р»РµРј СЃ РґР°С‚С‡РёРєР°РјРё,СЂР°Р±РѕС‚Р°РµС‚ РїРѕ СЃРѕС…СЂР°РЅРµРЅРЅРѕР№ С‚РµРјРїРµСЂР°С‚СѓСЂРµ,РѕРіСЂР°РЅРёС‡РёР» РІСЂРµРјСЏ С‚Р°РєРѕР№ СЂР°Р±РѕС‚С‹ РѕРґРЅРѕР№ РјРёРЅСѓС‚РѕР№.РєРЅРѕРїРєРѕР№ РїСЂРёРЅСЏС‚СЊ СЃРѕС…СЂР°РЅСЏСЋС‚СЃСЏ РЅР°СЃС‚СЂРѕР№РєРё,РєРЅРѕРїРєР° СЂРµР¶РёРј.СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ РіРїРёРѕ- РїРѕСЃС‚РѕСЏРЅРЅРѕ РІС‹РєР»,РїРѕСЃС‚РѕСЏРЅРЅРѕ РІРєР»,,РѕС…Р»Р°РґРёС‚РµР»СЊ.С‚РµСЂРјРѕСЃС‚Р°С‚.РЅР°СЃС‚СЂРѕР№РєРё РЅР° РіР»Р°РІРЅРѕР№ РјРѕРґСѓР»СЏ
 
 int32_t tempSave=1;
 int32_t tempVhod;
 uint8_t vremia_oshibki=0;
 bool time=0;
-uint8_t gpio=16; //номер гпио выход
+uint8_t gpio=16; //РЅРѕРјРµСЂ РіРїРёРѕ РІС‹С…РѕРґ
 void ICACHE_FLASH_ATTR startfunc() {
 }
 
 void ICACHE_FLASH_ATTR timerfunc(uint32_t timersrc) { 
 
-    tempVhod = data1wire[0] ;//датчик температуры dsw1
+    tempVhod = data1wire[0] ;//РґР°С‚С‡РёРє С‚РµРјРїРµСЂР°С‚СѓСЂС‹ dsw1
 	
     if ( sensors_param.cfgdes[2] < 0 || 23 < sensors_param.cfgdes[2] ) 
-		sensors_param.cfgdes[2] = 0 ; //часы 1
+		sensors_param.cfgdes[2] = 0 ; //С‡Р°СЃС‹ 1
 	
     if ( sensors_param.cfgdes[3] < 0 || 59 < sensors_param.cfgdes[3] ) 
-		sensors_param.cfgdes[3] = 0 ; //минуты 1
+		sensors_param.cfgdes[3] = 0 ; //РјРёРЅСѓС‚С‹ 1
 	
     if ( sensors_param.cfgdes[6] < 0 || 23 < sensors_param.cfgdes[6] ) 
-		sensors_param.cfgdes[6] = 0 ; //часы 2
+		sensors_param.cfgdes[6] = 0 ; //С‡Р°СЃС‹ 2
 	
     if ( sensors_param.cfgdes[7] < 0 || 59 < sensors_param.cfgdes[7] ) 
-		sensors_param.cfgdes[7] = 0 ; //минуты 2
+		sensors_param.cfgdes[7] = 0 ; //РјРёРЅСѓС‚С‹ 2
 	
     if ( sensors_param.cfgdes[8] < 0 || 3 < sensors_param.cfgdes[8] ) 
-		sensors_param.cfgdes[8] = 0 ; //режим
+		sensors_param.cfgdes[8] = 0 ; //СЂРµР¶РёРј
 	
     if ( tempVhod != 0 && tempVhod != 850 && tempVhod != 2550 ) { 
         tempSave = tempVhod ; 
@@ -34,7 +34,7 @@ void ICACHE_FLASH_ATTR timerfunc(uint32_t timersrc) {
         vremia_oshibki++ ; 
     }
 	
-    if ( 60 <= vremia_oshibki ){ //если датчик оборвало работаем минуту по сохраненному значению,если он не восстановится ,тогда уже станем в ошибкy
+    if ( 60 <= vremia_oshibki ){ //РµСЃР»Рё РґР°С‚С‡РёРє РѕР±РѕСЂРІР°Р»Рѕ СЂР°Р±РѕС‚Р°РµРј РјРёРЅСѓС‚Сѓ РїРѕ СЃРѕС…СЂР°РЅРµРЅРЅРѕРјСѓ Р·РЅР°С‡РµРЅРёСЋ,РµСЃР»Рё РѕРЅ РЅРµ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЃСЏ ,С‚РѕРіРґР° СѓР¶Рµ СЃС‚Р°РЅРµРј РІ РѕС€РёР±Рєy
         tempSave = tempVhod ; 
         vremia_oshibki = 0 ; 
     }
@@ -54,9 +54,9 @@ void ICACHE_FLASH_ATTR timerfunc(uint32_t timersrc) {
     }
 	
     if ( sensors_param.cfgdes[8] == 0 ) 
-		digitalWrite(gpio,0);//выкл постоянно
+		digitalWrite(gpio,0);//РІС‹РєР» РїРѕСЃС‚РѕСЏРЅРЅРѕ
 	
-    if ( sensors_param.cfgdes[8] == 1 ){ //холод
+    if ( sensors_param.cfgdes[8] == 1 ){ //С…РѕР»РѕРґ
         if ( time == 1 ) {
             if ( sensors_param.cfgdes[1] < tempSave ) 
 				digitalWrite(gpio,1);
@@ -70,7 +70,7 @@ void ICACHE_FLASH_ATTR timerfunc(uint32_t timersrc) {
         } 
     }
 	
-    if ( sensors_param.cfgdes[8] == 2 ){ //термостат
+    if ( sensors_param.cfgdes[8] == 2 ){ //С‚РµСЂРјРѕСЃС‚Р°С‚
         if ( time == 1 ) {
             if ( sensors_param.cfgdes[1] < tempSave ) 
 				digitalWrite(gpio,0);
@@ -84,50 +84,50 @@ void ICACHE_FLASH_ATTR timerfunc(uint32_t timersrc) {
         } 
     } 
 	
-    if ( sensors_param.cfgdes[8] == 3 ) digitalWrite(gpio,1);//вкл постоянно 
+    if ( sensors_param.cfgdes[8] == 3 ) digitalWrite(gpio,1);//РІРєР» РїРѕСЃС‚РѕСЏРЅРЅРѕ 
     }
 	
-void webfunc(char *pbuf) { //тут обьяснялок не будет
+void webfunc(char *pbuf) { //С‚СѓС‚ РѕР±СЊСЏСЃРЅСЏР»РѕРє РЅРµ Р±СѓРґРµС‚
     if ( GPIO_ALL_GET(gpio)!=0 && sensors_param.cfgdes[8] ==1 ) {
-        os_sprintf(HTTPBUFF,"</div><br><div class='h' style='background: #73c140 '> ТЕРМОСТАТ : <font color='blue'>включен</font> . &nbsp;&nbsp;");
+        os_sprintf(HTTPBUFF,"</div><br><div class='h' style='background: #73c140 '> РўР•Р РњРћРЎРўРђРў : <font color='blue'>РІРєР»СЋС‡РµРЅ</font> . &nbsp;&nbsp;");
     }
 	
     if ( GPIO_ALL_GET(gpio)!=0 && sensors_param.cfgdes[8] ==2 ) {
-        os_sprintf(HTTPBUFF,"</div><br><div class='h' style='background: #73c140 '> ТЕРМОСТАТ : <font color='yellow'>включен</font> . &nbsp;&nbsp;");
+        os_sprintf(HTTPBUFF,"</div><br><div class='h' style='background: #73c140 '> РўР•Р РњРћРЎРўРђРў : <font color='yellow'>РІРєР»СЋС‡РµРЅ</font> . &nbsp;&nbsp;");
     } 
 	
     if ( GPIO_ALL_GET(gpio)!=0 && sensors_param.cfgdes[8] ==3 ) {
-        os_sprintf(HTTPBUFF,"</div><br><div class='h' style='background: #73c140 '> ТЕРМОСТАТ : <font color='red'>включен</font> . &nbsp;&nbsp;");
+        os_sprintf(HTTPBUFF,"</div><br><div class='h' style='background: #73c140 '> РўР•Р РњРћРЎРўРђРў : <font color='red'>РІРєР»СЋС‡РµРЅ</font> . &nbsp;&nbsp;");
     } 
 	
     if ( GPIO_ALL_GET(gpio)==0 ) {
-        os_sprintf(HTTPBUFF,"</div><br><div class='h' style='background: #73c140 '> ТЕРМОСТАТ : <font color='black'>выключен</font> . &nbsp;");
+        os_sprintf(HTTPBUFF,"</div><br><div class='h' style='background: #73c140 '> РўР•Р РњРћРЎРўРђРў : <font color='black'>РІС‹РєР»СЋС‡РµРЅ</font> . &nbsp;");
     }
 	
     if(sensors_param.cfgdes[8] ==0){
-		os_sprintf(HTTPBUFF," Режим :<b><font color='black'> выключен постоянно</font></b>");
+		os_sprintf(HTTPBUFF," Р РµР¶РёРј :<b><font color='black'> РІС‹РєР»СЋС‡РµРЅ РїРѕСЃС‚РѕСЏРЅРЅРѕ</font></b>");
 	}
 	
     if(sensors_param.cfgdes[8] ==1){
-		os_sprintf(HTTPBUFF," Режим :<b><font color='blue'> охлаждение</font></b>");
+		os_sprintf(HTTPBUFF," Р РµР¶РёРј :<b><font color='blue'> РѕС…Р»Р°Р¶РґРµРЅРёРµ</font></b>");
 	}
 	
     if(sensors_param.cfgdes[8] ==2){
-		os_sprintf(HTTPBUFF," Режим :<b><font color='yellow'> нагреватель</font></b>");
+		os_sprintf(HTTPBUFF," Р РµР¶РёРј :<b><font color='yellow'> РЅР°РіСЂРµРІР°С‚РµР»СЊ</font></b>");
 	}
 	
     if(sensors_param.cfgdes[8] ==3){
-		os_sprintf(HTTPBUFF," Режим :<b><font color='red'> включен постоянно</font></b>");
+		os_sprintf(HTTPBUFF," Р РµР¶РёРј :<b><font color='red'> РІРєР»СЋС‡РµРЅ РїРѕСЃС‚РѕСЏРЅРЅРѕ</font></b>");
 	}
 	
     if(sensors_param.cfgdes[8] ==1){
-		os_sprintf(HTTPBUFF,"</div><div class='c'><div class='main'><form action=configdes><pre><table border='0'class='catalogue'><tr style='background-color: yellow'><td> часы </td><td> минуты </td><td> темп выкл</td><td> темп вкл </td></tr><tr><td>c <INPUT size=2 NAME='cfg3'value='%02d'></td><td> <INPUT size=2 NAME='cfg4'value='%02d'></td><td> ниже <INPUT size=2 NAME='cfg1' value='%s'> °C</td>",sensors_param.cfgdes[2],sensors_param.cfgdes[3], fltostr(sensors_param.cfgdes[0]));
+		os_sprintf(HTTPBUFF,"</div><div class='c'><div class='main'><form action=configdes><pre><table border='0'class='catalogue'><tr style='background-color: yellow'><td> С‡Р°СЃС‹ </td><td> РјРёРЅСѓС‚С‹ </td><td> С‚РµРјРї РІС‹РєР»</td><td> С‚РµРјРї РІРєР» </td></tr><tr><td>c <INPUT size=2 NAME='cfg3'value='%02d'></td><td> <INPUT size=2 NAME='cfg4'value='%02d'></td><td> РЅРёР¶Рµ <INPUT size=2 NAME='cfg1' value='%s'> В°C</td>",sensors_param.cfgdes[2],sensors_param.cfgdes[3], fltostr(sensors_param.cfgdes[0]));
 	}
 	else{
-		os_sprintf(HTTPBUFF,"</div><div class='c'><div class='main'><form action=configdes><pre><table border='0'class='catalogue'><tr style='background-color: yellow'><td> часы </td><td> минуты </td><td> темп вкл </td><td> темп выкл</td></tr><tr><td>c <INPUT size=2 NAME='cfg3'value='%02d'></td><td> <INPUT size=2 NAME='cfg4'value='%02d'></td><td> ниже <INPUT size=2 NAME='cfg1' value='%s'> °C</td>",sensors_param.cfgdes[2],sensors_param.cfgdes[3], fltostr(sensors_param.cfgdes[0]));
+		os_sprintf(HTTPBUFF,"</div><div class='c'><div class='main'><form action=configdes><pre><table border='0'class='catalogue'><tr style='background-color: yellow'><td> С‡Р°СЃС‹ </td><td> РјРёРЅСѓС‚С‹ </td><td> С‚РµРјРї РІРєР» </td><td> С‚РµРјРї РІС‹РєР»</td></tr><tr><td>c <INPUT size=2 NAME='cfg3'value='%02d'></td><td> <INPUT size=2 NAME='cfg4'value='%02d'></td><td> РЅРёР¶Рµ <INPUT size=2 NAME='cfg1' value='%s'> В°C</td>",sensors_param.cfgdes[2],sensors_param.cfgdes[3], fltostr(sensors_param.cfgdes[0]));
 	}
-    os_sprintf(HTTPBUFF+os_strlen(HTTPBUFF),"<td> выше <INPUT size=2 NAME='cfg2'value='%s'> °C</td></tr>",fltostr(sensors_param.cfgdes[1]));
-    os_sprintf(HTTPBUFF+os_strlen(HTTPBUFF),"<tr><td>c <INPUT size=2 NAME='cfg7'value='%02d'></td><td> <INPUT size=2 NAME='cfg8'value='%02d'></td><td> ниже <INPUT size=2 NAME='cfg5' value='%s'> °C</td>",sensors_param.cfgdes[6],sensors_param.cfgdes[7], fltostr(sensors_param.cfgdes[4]));
-    os_sprintf(HTTPBUFF+os_strlen(HTTPBUFF),"<td> выше <INPUT size=2 NAME='cfg6'value='%s'> °C</td></tr></table><br><input type='hidden'name='cfg9' value='%d'><input type='hidden'name='st'value=3><input type=submit value='принять'onclick='pb(cfg1);pb(cfg2);pb(cfg5);pb(cfg6)'> <input type=submit value='режим'onclick='pb(cfg1);pb(cfg2);pb(cfg5);pb(cfg6);eb(cfg9)'></pre></form></div><script>function pb(x){x.value = x.value*10};function eb(x){x.value =Number(x.value)+ 1}</script>",fltostr(sensors_param.cfgdes[5]),sensors_param.cfgdes[8]);
+    os_sprintf(HTTPBUFF+os_strlen(HTTPBUFF),"<td> РІС‹С€Рµ <INPUT size=2 NAME='cfg2'value='%s'> В°C</td></tr>",fltostr(sensors_param.cfgdes[1]));
+    os_sprintf(HTTPBUFF+os_strlen(HTTPBUFF),"<tr><td>c <INPUT size=2 NAME='cfg7'value='%02d'></td><td> <INPUT size=2 NAME='cfg8'value='%02d'></td><td> РЅРёР¶Рµ <INPUT size=2 NAME='cfg5' value='%s'> В°C</td>",sensors_param.cfgdes[6],sensors_param.cfgdes[7], fltostr(sensors_param.cfgdes[4]));
+    os_sprintf(HTTPBUFF+os_strlen(HTTPBUFF),"<td> РІС‹С€Рµ <INPUT size=2 NAME='cfg6'value='%s'> В°C</td></tr></table><br><input type='hidden'name='cfg9' value='%d'><input type='hidden'name='st'value=3><input type=submit value='РїСЂРёРЅСЏС‚СЊ'onclick='pb(cfg1);pb(cfg2);pb(cfg5);pb(cfg6)'> <input type=submit value='СЂРµР¶РёРј'onclick='pb(cfg1);pb(cfg2);pb(cfg5);pb(cfg6);eb(cfg9)'></pre></form></div><script>function pb(x){x.value = x.value*10};function eb(x){x.value =Number(x.value)+ 1}</script>",fltostr(sensors_param.cfgdes[5]),sensors_param.cfgdes[8]);
     
 }

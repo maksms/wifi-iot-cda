@@ -1,6 +1,8 @@
 Mainboard FlyMon Graph
 ======================
 
-Вывод графиков FlyMon на титульную через Конструктор Кода в проекте WiFi-IoT.com
+Модуль для Конструктора Кода в проекте WiFi-IoT.com
+
+Вывод графиков FlyMon на титульную.
 
 ![mainboard flymon graph](screenshot_01.png "mainboard flymon graph")

@@ -18,12 +18,10 @@ script; if not, please visit http://www.gnu.org/copyleft/gpl.html for more infor
 Quick Start
 ===========
 
-<------># Enjoy ! >;)
-<------>echo "OK!"
+	# Enjoy ! >;)
+	echo "OK!"
 
 Links
 =====
 
-<------>https://wifi-iot.com
-
-
+	https://wifi-iot.com

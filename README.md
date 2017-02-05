@@ -4,6 +4,7 @@ WiFi-IoT CDA (Code Designer Archive)
 Данный архив содержит примеры для Конструктора Кода, собранные сообществом WiFi-IoT.com
 
 
+
 Rules
 =====
 
@@ -30,8 +31,10 @@ Rules
 Все пожелания и замечания приветствуются.
 
 
+
 Links
 =====
 
-	https://wifi-iot.com
-	https://flymon.slack.com/messages
+https://wifi-iot.com/p/wiki/70/
+
+https://flymon.slack.com/messages

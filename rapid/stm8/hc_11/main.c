@@ -4,17 +4,17 @@ MOSI - PC6
 SCLK - PC5
 CSn -  PD4 настроить как выход, установить в 0 для передачи по SPI интерфейсу
 */
-#define GDO0_PIN 	  GPIO_PIN_3 			
-#define CSn_PIN 	  GPIO_PIN_4
-#define SCLK_PIN    GPIO_PIN_5
+#define GDO0_PIN 	GPIO_PIN_3 			
+#define CSn_PIN 	GPIO_PIN_4
+#define SCLK_PIN    	GPIO_PIN_5
 #define MOSI_PIN   	GPIO_PIN_6
 #define MISO_PIN   	GPIO_PIN_7
 
 //--------- Регистры CC1101 ----------------
-#define SRES 			0x30
-#define SRX 			0x34
-#define STX 			0x35
-#define SNOP 			0x3D
+#define SRES 		0x30
+#define SRX 		0x34
+#define STX 		0x35
+#define SNOP 		0x3D
 
 #define IOCFG2		0x00
 #define IOCFG1    0x01
@@ -132,7 +132,7 @@ main()
 //-------------------------------------------------
 //------ Начальная установка для ds18b20 ----------
     GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_OUT_OD_HIZ_FAST); 	// Пин DS_BIT настроен как выход
-		GPIO_WriteHigh(GPIOD,GDO0_PIN);		 											
+    GPIO_WriteHigh(GPIOD,GDO0_PIN);		 											
  // GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_IN_FL_NO_IT);					// Пин DS_BIT настроен как вход
 //-------------------------------------------------
 	while (1) 
@@ -145,7 +145,7 @@ main()
 																				//на время преобразования
 		GPIO_WriteHigh(GPIOC,DS_BIT);				// Поднять пин DS_BIT (включение подтяжки)
 		GPIO_Init (GPIOC, DS_BIT,GPIO_MODE_OUT_OD_HIZ_FAST);								// Пин DS_BIT настроен как выход
-    delay(1000000);
+    		delay(1000000);
 	//	GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_IN_FL_NO_IT);								// Пин DS_BIT настроен как вход
 	//	GPIO_WriteLow (GPIOC,DS_BIT);				// Сбросить пин DS_BIT (отключение подтяжки)
 		OneWireReset();								// Процедура инициализации на шине
@@ -159,13 +159,12 @@ main()
 		SignBit = TReading & 0x8000;  
 		if (SignBit)
 			{
-				TReading = (TReading ^ 0xffff) + 1; 
+			TReading = (TReading ^ 0xffff) + 1; 
 			}
 				// tempds = (6 * TReading) + TReading / 4; 
-        sendRC(((6 * TReading) + TReading / 4)/10+500+keyT); // отправляем данные			
-	      // sendRC(TReading); // отправляем данные			
-				delay(0x1E8F5C);	//Тестовая задержка				
-	
+       			 sendRC(((6 * TReading) + TReading / 4)/10+500+keyT); // отправляем данные			
+	     			 // sendRC(TReading); // отправляем данные			
+			delay(0x1E8F5C);	//Тестовая задержка				
 	}
 }
 //------------------------------------------------
@@ -184,8 +183,8 @@ void init_SPI(void)
 		SPI_MODE_MASTER, SPI_CLOCKPOLARITY_LOW, SPI_CLOCKPHASE_1EDGE,  // Режим мастера, Clock to 0 в режиме ожидания,
 		SPI_DATADIRECTION_2LINES_FULLDUPLEX, SPI_NSS_SOFT, 0);
 		
-		//	CLK_PeripheralClockConfig(CLK_PERIPHERAL_SPI, ENABLE);  
-		
+		//CLK_PeripheralClockConfig(CLK_PERIPHERAL_SPI, ENABLE);  
+
 		SPI_ITConfig(SPI_IT_RXNE, ENABLE);												// Активируем прерывание по приему байта
 		SPI_Cmd(ENABLE);   // Активируем SPI модуль
 	}
@@ -197,7 +196,7 @@ void init_gpio(void)
 	GPIO_WriteHigh(GPIOD,GDO0_PIN);														// Поднимаем в единицу
 	GPIO_Init (GPIOD, CSn_PIN, GPIO_MODE_OUT_PP_HIGH_FAST); 	// Output push-pull, high level, 10MHz 
 	GPIO_Init (GPIOC, SCLK_PIN, GPIO_MODE_OUT_PP_HIGH_FAST); 	// Output push-pull, high level, 10MHz 
-  GPIO_Init (GPIOC, MOSI_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);	// Output push-pull, high level, 10MHz 
+  	GPIO_Init (GPIOC, MOSI_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);	// Output push-pull, high level, 10MHz 
 	GPIO_Init (GPIOC, MISO_PIN, GPIO_MODE_IN_FL_NO_IT);				// Input floating, no external interrupt 
 }
 
@@ -212,7 +211,7 @@ void cc1101_init(void)
 		delay(150); // Ждем 500мкс
 		for (cnt=0;cnt<sizeof(config_433_ook);cnt++) 
 			{
-				SPI_SendData(config_433_ook[cnt]);
+			SPI_SendData(config_433_ook[cnt]);
 			}
 		delay(150); // сюда вставить задержку (какую, не знаю пока)
 		SPI_SendData(STX); 	//Отправка строба "передача" 
@@ -223,7 +222,7 @@ void cc1101_init(void)
 void sendRC(unsigned long data) // , unsigned short pin 531 440 max 
 	{    
 	//	unsigned short repeats = 1 << (((unsigned long)data >> 20) & 7);
-	  unsigned short repeats = 5;
+	 	unsigned short repeats = 5;
 	
 		unsigned long dataBase4 = 0; 
 		uint8_t i,iy;
@@ -232,14 +231,14 @@ void sendRC(unsigned long data) // , unsigned short pin 531 440 max
 		data = data & 0xfffff; 								//truncate to 20 bit
 	for (i=0; i<20; i++) 
 		{
-			dataBase4<<=1;
-			dataBase4|=(data%2);
-			data/=2;														// эквивалентно data=data/2
+		  dataBase4<<=1;
+		  dataBase4|=(data%2);
+		  data/=2;														// эквивалентно data=data/2
 		}
 		// repeats=20;
 	for (j=0;j<repeats;j++) 
 		{
-			data=dataBase4; 
+		  data=dataBase4; 
 			
 	for (iy=0; iy<20; iy++) 
 		{ 
@@ -287,11 +286,11 @@ for ( ; count > 0; --count);
  */
  void OneWireReset() 
 	{
-     GPIO_Init (GPIOC, DS_BIT,GPIO_MODE_OUT_OD_HIZ_FAST);			// Пин DS_BIT настроен как выход
-		 GPIO_WriteLow (GPIOC,DS_BIT);											// Сбросить пин DS_BIT (отключение подтяжки)
-     delay(500);							// Задержка 500мкс
-		 GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_IN_FL_NO_IT);	// Отпускаем линию (пин DS_BIT настроен как вход)
-     delay(500);							// Задержка 500мкс
+    	 	GPIO_Init (GPIOC, DS_BIT,GPIO_MODE_OUT_OD_HIZ_FAST);			// Пин DS_BIT настроен как выход
+		GPIO_WriteLow (GPIOC,DS_BIT);											// Сбросить пин DS_BIT (отключение подтяжки)
+     		delay(500);							// Задержка 500мкс
+		GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_IN_FL_NO_IT);	// Отпускаем линию (пин DS_BIT настроен как вход)
+     		delay(500);							// Задержка 500мкс
 	}
 //-------------------------------------------------------
 void OneWireOutByte(uint8_t d) 
@@ -303,13 +302,13 @@ void OneWireOutByte(uint8_t d)
 				{	//--- отправляем лог.1 в линию 1-wire
 					GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_OUT_OD_HIZ_FAST);			// Пин DS_BIT настроен как выход
 					GPIO_WriteLow (GPIOC,DS_BIT);			// Сбросить пин DS_BIT (отключение подтяжки)
-				  delay(5);									// Задержка 5мкс
+				 	delay(5);									// Задержка 5мкс
 					GPIO_WriteHigh (GPIOC,DS_BIT);				// Пин DS_BIT настроен как вход
 					delay(60);								// Задержка 60мкс
 				}
       else
 				{	//--- отправляем лог.0 в линию 1-wire
-				  GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_OUT_OD_HIZ_FAST);		// Пин DS_BIT настроен как выход
+				  	GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_OUT_OD_HIZ_FAST);		// Пин DS_BIT настроен как выход
 					GPIO_WriteLow (GPIOC,DS_BIT);			// Сбросить пин DS_BIT (отключение подтяжки)
 					delay(60);								// Задержка 60мкс
 					GPIO_WriteHigh (GPIOC,DS_BIT);		
@@ -325,17 +324,17 @@ uint8_t OneWireInByte()
 			{
 				GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_OUT_OD_HIZ_FAST);
 				GPIO_WriteLow (GPIOC,DS_BIT);			// Сбросить пин DS_BIT (отключение подтяжки)
-        delay(5);													// Задержка 5мкс
+        			delay(5);													// Задержка 5мкс
 				GPIO_Init (GPIOC, DS_BIT, GPIO_MODE_IN_FL_NO_IT);							// Пин DS_BIT настроен как вход
       //  delay(5);													// Задержка 5мкс
 			//	b = (GPIO_ReadInputPin(GPIOC,DS_BIT)!= 0);	// читаем значение пина DS_BIT
         if (GPIO_ReadInputPin(GPIOC,DS_BIT)!=0)
 					{
-						b=0b00000001;
-				  }
+					b=0b00000001;
+				  	}
 					else
 					{
-						b=0b00000000;
+					b=0b00000000;
 					}
 				delay(60);												// Задержка 50мкс
 				d = (d >> 1) | (b<<7);

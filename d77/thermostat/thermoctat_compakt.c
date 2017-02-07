@@ -13,7 +13,7 @@ void ICACHE_FLASH_ATTR startfunc() {
 void ICACHE_FLASH_ATTR timerfunc(uint32_t timersrc) { 
     tempVhod = data1wire[0] ;//датчик температуры dsw1
 	for(i=0;i<9;i++){
-	    sensors_param.cfgdes[i]	= ( sensors_param.cfgdes[i] < cfg[i*3] || cfg[(i*3)+1] < sensors_param.cfgdes[i] ) ? cfg[(i*3)+2]:sensors_param.cfgdes[i];   
+    if ( sensors_param.cfgdes[i] < cfg[i*3] || cfg[(i*3)+1] < sensors_param.cfgdes[i] ) sensors_param.cfgdes[i]	= cfg[(i*3)+2];   
 	}
     if ( ( tempVhod != 0 && tempVhod != 850 && tempVhod != 2550 ) || ( 60 <= vremia_oshibki ) ) { //если датчик оборвало работаем минуту по сохраненному значению,если он не восстановится ,тогда уже станем в ошибкy
         tempSave = tempVhod ; 

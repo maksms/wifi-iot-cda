@@ -1,4 +1,4 @@
-int32_t  zadergka_reboot=0;
+uint8_t  zadergka_reboot=0;
 void ICACHE_FLASH_ATTR
 startfunc()
 {

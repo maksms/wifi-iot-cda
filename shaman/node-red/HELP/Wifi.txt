@@ -1,0 +1,33 @@
+1 залил образ на карту
+2 подключил консоль
+3 все обновил, все скачал
+4 диет конфиг - настрока вифи чтоб подключилося, выбрал применить
+5 добавляем в  nano /etc/network/interfaces 
+***************************** 
+# Wifi
+allow-hotplug wlan0
+auto wlan0  // добавляем эту строчку, остальное не трогаем
+
+*******************************
+6 создаем файл демона nano /etc/systemd/system/xradio_wlan.service
+*****************************************
+[Unit]
+Description=xradio_wlan
+After=network.target network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+ExecStartPre=/bin/bash -c 'modprobe xradio_wlan'
+ExecStartPre=/bin/bash -c 'iwconfig wlan0 power off'
+ExecStart=/bin/bash -c 'ifup wlan0'
+
+[Install]
+WantedBy=multi-user.target
+**********************************************
+
+7 выполняем
+systemctl enable xradio_wlan.service
+systemctl daemon-reload
+8 ребут

@@ -1,0 +1,56 @@
+качаем -  wget https://dl.influxdata.com/influxdb/releases/influxdb_1.2.0_armhf.deb
+ставим -  dpkg -i influxdb_1.2.0_armhf.deb
+запускаем - service influxdb start
+настраиваем - nano /etc/influxdb/influxdb.conf
+
+запускаем - influx
+**************
+Connected to http://localhost:8086 version 1.2.x
+InfluxDB shell 1.2.x
+*********************************************************
+
+создаем  базу данных - CREATE DATABASE shaman_db
+
+проверяем -  SHOW DATABASES
+***********************************
+name: databases
+---------------
+name
+_internal
+shaman_db
+***********************************
+тестируем -  INSERT node,t1=rssi rssi=-70i,temp=21.0,gpio13=0i,gpio14=0i,mem=1054i
+Проверяем -  USE shaman_db
+************************************************************
+Using database shaman_db
+***********************************************************
+
+Посмотрим данные - SELECT * FROM /.*/
+***************************************************************
+name: node
+-----------------
+time                 gpio13  gpio14  mem    rssi  t1    temp
+1485698285375475611  0       0       1054   -70   rssi  21.0
+*********************************************************************
+reboot
+
+
+
+
+
+
+
+
+
+
+
+
+
+influx
+показать базы - SHOW DATABASES
+создать базу -    CREATE DATABASE shaman_db
+удалить базу       DROP DATABASE shaman_db
+привязать базу   USE shaman_db
+
+показать              SHOW MEASUREMENTS
+показать              SHOW TAG KEYS FROM "measurement_name"

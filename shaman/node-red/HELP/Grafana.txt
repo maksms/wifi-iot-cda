@@ -1,7 +1,0 @@
-качаем -  wget  https://github.com/fg2it/grafana-on-raspberry/releases/download/v4.1.1/grafana_4.1.1-1484347088_armhf.deb
-устанавливаем -  dpkg -i grafana_4.1.1-1484347088_armhf.deb
-apt install libfontconfig
-apt-get -f install
-запускаем - service grafana-server start
-добавить в автозагрузку - systemctl enable grafana-server
-reboot

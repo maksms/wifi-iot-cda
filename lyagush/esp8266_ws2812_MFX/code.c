@@ -1,10 +1,10 @@
 ﻿static os_timer_t esp_timer; static uint8_t data[255];
- char i,s,m, on,hsvhue,tim1,tim2,rgbr,rgbg,rgbb,napr, reset; 
+ char i,s,m, on,hsvhue,rgbr,rgbg,rgbb,napr, reset; 
  static uint8_t  fram[22] = {190,220,70,250,170,240,110,120,80,242,159,230,250,234,160,210,77,120,72,231,220,110}; char setu[80];
 char rgbr1,rgbr1,rgbg1,rgbg2,rgbb2,rgbb2, vhu1,vhu2,vsat1,vsat2,vval1,vval2,vala1, sta=100, asa, vala2,lent;
-char st, frpl,fir;	
-char on1, m1, lent1, tim1b, vhu1b, vsat1b, vsat2b, vval1b, vval2b;
-void ICACHE_FLASH_ATTR hsv2rgb_rainbow(); void fire (char fre);	void plam(char s);	void timer (char time);  
+char st, frpl,fir;	int tim1,tim2, tim1b;
+char on1, m1, lent1, vhu1b, vsat1b, vsat2b, vval1b, vval2b;
+void ICACHE_FLASH_ATTR hsv2rgb_rainbow(); void fire (char fre);	void plam(char s);	void timer (int time);  
 #define K255 255
 #define K171 171
 #define K170 170
@@ -13,7 +13,7 @@ void ICACHE_FLASH_ATTR hsv2rgb_rainbow(); void fire (char fre);	void plam(char s
 #define BEGU(var)		((fir*var)/255)
 #define BEGI(var)		if (var>128) { var-=128; (255-(((var*2)*fir)/255))} else  { var-=128; ((((var*2)*fir)/255))} 
 #define BEGA(var)		if (var>128) { var-=128; (255-(((var*2)*fir)/255))} else  { var-=128; ((((var*2)*fir)/255))} 
-#define M4		(m/4)
+#define M4		(m/3)
 #define DOLU(var)		((((var)/(m/4))*st)/100)
 #define NULA(var)		(char v=var/2; var=v*2;)
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
@@ -27,7 +27,9 @@ uint8_t scale8video( uint8_t i, uint8_t scale)
 uint8_t scale8( uint8_t i, uint8_t scale)
 {   uint8_t j= (((uint16_t)i) * (1+(uint16_t)(scale))) >> 8;		return	j;	}
 
-void webfunc(char *pbuf) {}
+ 
+void webfunc(char *pbuf) {
+os_sprintf(HTTPBUFF,"<br>frpl: %03d  s:%03d",frpl,s);  }
 
 void ICACHE_FLASH_ATTR hsv2rgb_rainbow()
 		{    	const uint8_t Y1 = 1;    const uint8_t Y2 = 0;	const uint8_t G2 = 0;     const uint8_t Gscale = 0;
@@ -107,14 +109,14 @@ vval1=fre/10;  	vsat1=255;  // vhu1=0;
 	
  ///////////////////////////////////////////////////////////////////////////////////
 void ICACHE_FLASH_ATTR migal()
-{char gok, h, ment=m*lent; 
+{char gok, h, ment=m*lent, mo; 
 if (on>0) { if (on==1) plam(gok); s=0;
 for (h=0;h<ment;h++){
-	
+	mo = lent-1 ? m : m-1;
 if (s==m & on==1) 	{ s=0; gok++; plam(gok);} else
-		if (s==m & on!=1 ) 		{ s=0; if (on==4) {frpl++; if (frpl>(m)) frpl=0;}}	
+		if (s==mo & on!=1 ) 		{ s=0; if ((on==4) & ((st%3)==0)) {frpl++;  if (frpl==m) frpl=0;}}	
 if (h%3==0 & on==4) {
-if (s>(frpl) & s < (M4+(frpl)))		fir=(s-(frpl))*(255/M4); else fir=0; 
+if (s>(frpl) & s < (M4+(frpl)))		fir=(s-(frpl))*(255/M4); else fir=0; 	// M4	(m/4)
 if (frpl > (m-M4) & s < (frpl-(m-M4))) 	fir=(m-(frpl-s))*(255/M4); }
 
 hsv2rgb_rainbow();
@@ -122,6 +124,7 @@ if (h%3==0) {data[h] = rgbg;} else
 if (h%3==1) {data[h] = rgbr;}  else
 if (h%3==2) {data[h] = rgbb;}  s++; 
 }
+
 if (on==3 | on==4 ) { st++;if (st>254) st=0;} else
 if (on==2) { vhu1++;} 
  if (on==3 | on==2) { if (sta>254) asa = 0; if (sta<2) asa =1;
@@ -172,7 +175,7 @@ CONF(8) = vval2;
 if (reset==20) {ws2812_init(); reset =0;} reset++;
 if (tim1!=tim2) {tim2=tim1;	timer (tim1); }
  }
- void timer (char time) 
+ void timer (int time) 
  {os_timer_disarm(&esp_timer);
 os_timer_setfn(&esp_timer, (os_timer_func_t *) migal, NULL);
 os_timer_arm(&esp_timer, time, 1); }

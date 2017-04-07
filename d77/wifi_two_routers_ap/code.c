@@ -21,8 +21,8 @@ alt_ssid_mode1(){
 alt_ssid_mode2(){    
     struct station_config stationConf;  
     wifi_station_get_config(&stationConf);
-    os_sprintf(stationConf.ssid,"PASSWORD");//имя роутера 2
-    os_sprintf(stationConf.password,"petrovich");//пароль роутера 2 
+    os_sprintf(stationConf.ssid,"ROUTER2");//имя роутера 2
+    os_sprintf(stationConf.password,"PASSWORD");//пароль роутера 2 
     wifi_station_set_config(&stationConf);;//применить параметры роутера 2
 }
 void ICACHE_FLASH_ATTR startfunc(){}

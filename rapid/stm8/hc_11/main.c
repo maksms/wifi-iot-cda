@@ -183,9 +183,7 @@ void init_SPI(void)
 		SPI_MODE_MASTER, SPI_CLOCKPOLARITY_LOW, SPI_CLOCKPHASE_1EDGE,  // Режим мастера, Clock to 0 в режиме ожидания,
 		SPI_DATADIRECTION_2LINES_FULLDUPLEX, SPI_NSS_SOFT, 0);
 		
-		//CLK_PeripheralClockConfig(CLK_PERIPHERAL_SPI, ENABLE);  
-
-		SPI_ITConfig(SPI_IT_RXNE, ENABLE);												// Активируем прерывание по приему байта
+		//CLK_PeripheralClockConfig(CLK_PERIPHERAL_SPI, ENABLE);  												// Активируем прерывание по приему байта
 		SPI_Cmd(ENABLE);   // Активируем SPI модуль
 	}
 
@@ -212,10 +210,11 @@ void cc1101_init(void)
 		for (cnt=0;cnt<sizeof(config_433_ook);cnt++) 
 			{
 			SPI_SendData(config_433_ook[cnt]);
+			while ((SPI->SR & (u8)SPI_FLAG_TXE) == RESET) { ; } /* Ждём очистки регистра DR */
 			}
 		delay(150); // сюда вставить задержку (какую, не знаю пока)
 		SPI_SendData(STX); 	//Отправка строба "передача" 
-												// SPI_ReadByte(SNOP);
+		delay(10); 										// SPI_ReadByte(SNOP);
 		GPIO_WriteHigh(GPIOD,CSn_PIN); 	// Устанавливаем на выводе CSn высокий уровень
 }
 //-------- Функция отправки RemoteSwitch(двоичный протокол) --------------

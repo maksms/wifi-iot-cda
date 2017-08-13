@@ -1,3 +1,4 @@
+/*при сборке добавить 1 перенную в настройках КК*/
 #define GPIO_switch 13
 #define GPIO_button_minus 12
 #define GPIO_button_plus 14

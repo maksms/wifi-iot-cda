@@ -18,7 +18,7 @@ read_kod()
 		flag_button_minus++;
 		sost_button_minus=digitalRead(GPIO_button_minus);
 	} 
-	if (tik1_button_minus<=5)
+	if (tik1_button_minus<=3)
 	{
 	    if (1<flag_button_minus)
 		{

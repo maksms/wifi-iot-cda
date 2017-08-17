@@ -11,8 +11,8 @@ uint8_t flag_button_plus = 0;
 bool sost_button_minus = 0;
 bool sost_button_plus = 0;
 bool flag_sost_switch_reception = 0;
-char displey0[16];
-char displey1[16];
+char display0[16];
+char display1[16];
 static os_timer_t esp_timer1;
 read_kod()
 {
@@ -109,10 +109,10 @@ void ICACHE_FLASH_ATTR timerfunc(uint32_t timersrc)
 		sendtelegramm();
 	}
 	valdes[1] = flag_sost_switch_reception = digitalRead(GPIO_switch);
-	os_sprintf(displey0, "%s", digitalRead(GPIO_switch) ? "PRIEM" : "NET PRIEMA");
-	os_sprintf(displey1, "%d", valdes[0]);
-	LCD_print(0, displey0);
-	LCD_print(1, displey1);
+	os_sprintf(display0, "%s", digitalRead(GPIO_switch) ? "PRIEM" : "NET PRIEMA");
+	os_sprintf(display1, "%d", valdes[0]);
+	LCD_print(0, display0);
+	LCD_print(1, display1);
 }
 void webfunc(char *pbuf)
 {

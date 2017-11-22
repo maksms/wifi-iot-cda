@@ -22,24 +22,35 @@
   
 *****************************************************************************************
  Прямые ссылки на страницы конфигурации:
+ 
  /configall               // настройка Hardware
+ 
  /configpio               // gpio
+ 
  /configupd?st=5          // normal OTA
+ 
  /configtermo&full=1       // полная версия термостата
  
-
+ 
 *****************************************************************************************
 команды mqtt через api.
+
 {"gpiomode":{"0":"","1":"","2":"","3":"","4":"","5":"","12":"out","13":"outinv","14":"out","15":"","16":""}}
+
 {"hardware":{"interval":2,"i2c":{"scl":3,"sda":1},"bh1750":{"en":0}}}
+
 {"servers":{"narodmon":{"en":0,"interval":5},"flymon":{"en":1},"mqtt":{"en":1,"interval":10,"server":"mqtt.wifi-iot.com","port":1883,"login":"mailumka2@gmail.com","passw":"8vfhnf"}}}
+
 {"thermostat":{"termo1":{"en":1,"sensor":31,"min":10,"max":11,"gpio":14}}}
 
 
 ******************************************************************************************
 Команды термостата для Народмона
+
 settermo1=20
+
 entermo1=1
+
 
 *******************************************************************************************
 
@@ -49,6 +60,6 @@ entermo1=1
 Links
 =====
 
-https://wifi-iot.com/p/wiki/70/
+https://www.youtube.com/watch?v=wW_ciK9qS9g
 
-https://flymon.slack.com/messages
+https://www.youtube.com/watch?v=PkroINWYZ38

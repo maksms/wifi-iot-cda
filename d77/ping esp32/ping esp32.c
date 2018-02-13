@@ -10,9 +10,9 @@ esp_err_t pingResults(ping_target_id_t msgType, esp_ping_found * pf)
 }
 void ping_test_esp32()
 {
-    uint32_t ip_pinG = ipaddr_addr("8.8.8.8");//ip adress ping
-    uint32_t ping_timeout = 1; //Sek till we consider it timed out
-    uint32_t ping_delay = 1; //Sek between pings
+    	uint32_t ip_pinG = ipaddr_addr("8.8.8.8");//ip adress ping
+    	uint32_t ping_timeout = 1; //Sek till we consider it timed out
+    	uint32_t ping_delay = 1; //Sek between pings
 	ping_deinit();
 	esp_ping_set_target(PING_TARGET_IP_ADDRESS_COUNT, &ping_count, sizeof(uint32_t));
 	esp_ping_set_target(PING_TARGET_RCV_TIMEO, &ping_timeout, sizeof(uint32_t)); 
@@ -26,11 +26,11 @@ void startfunc()
 }
 void timerfunc(uint32_t  timersrc) 
 { 
-    if(timersrc%(ping_count*3)==0 && timersrc )
+        if(timersrc%(ping_count*3)==0 && timersrc )
 	{
 		ping_test_esp32();
 	}
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 void webfunc(char *pbuf) 
 {

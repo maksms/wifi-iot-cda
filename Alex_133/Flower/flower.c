@@ -1,163 +1,204 @@
-// Проект "Цветок" для конструктора кода ESP32
-// Настройки: [0]:Сухая земля, [1]:Яркость низкая, [2]:Яркость высокая, 
-// [3]:Время полива, [4]:Зелёный вкл., [5]:Насос вкл., [6]:PWM вкл., 
-// [7]:Инверт. PWM, [8]:Время вкл.часы, [9]:Время вкл. мин.,
-// [10]:Время выкл. часы, [11]:Время выкл. мин.
-// Глобальные переменные: 4 шт.
-// valdes[0] - предыдущее задание ШИМ
-// valdes[1] - задание ШИМ в %
-// valdes[2] - разрешение работать по времени
-// valdes[3] - текущее задание ШИМ
+// РџСЂРѕРµРєС‚ "Р¦РІРµС‚РѕРє" РґР»СЏ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂР° РєРѕРґР° ESP32
+// РќР°СЃС‚СЂРѕР№РєРё: [0]:РЎСѓС…Р°СЏ Р·РµРјР»СЏ, [1]:РЇСЂРєРѕСЃС‚СЊ РЅРёР·РєР°СЏ, [2]:РЇСЂРєРѕСЃС‚СЊ РІС‹СЃРѕРєР°СЏ,
+// [3]:Р’СЂРµРјСЏ РїРѕР»РёРІР°, [4]:Р—РµР»С‘РЅС‹Р№ РІРєР»., [5]:РќР°СЃРѕСЃ РІРєР»., [6]:PWM РІРєР».,
+// [7]:РРЅРІРµСЂС‚. PWM, [8]:Р’СЂРµРјСЏ РІРєР».С‡Р°СЃС‹, [9]:Р’СЂРµРјСЏ РІРєР». РјРёРЅ.,
+// [10]:Р’СЂРµРјСЏ РІС‹РєР». С‡Р°СЃС‹, [11]:Р’СЂРµРјСЏ РІС‹РєР». РјРёРЅ., [12]:Р—Р°РґРµСЂР¶РєР° РїРѕСЃР»Рµ РїРѕР»РёРІР° РјРёРЅ.
+// Р“Р»РѕР±Р°Р»СЊРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ: 6 С€С‚.
+// valdes[0] - РїСЂРµРґС‹РґСѓС‰РµРµ Р·Р°РґР°РЅРёРµ РЁРРњ
+// valdes[1] - Р·Р°РґР°РЅРёРµ РЁРРњ РІ %
+// valdes[2] - СЂР°Р·СЂРµС€РµРЅРёРµ СЂР°Р±РѕС‚Р°С‚СЊ РїРѕ РІСЂРµРјРµРЅРё
+// valdes[3] - С‚РµРєСѓС‰РµРµ Р·Р°РґР°РЅРёРµ РЁРРњ
 
-void startfunc(){  // выполняется один раз при старте модуля.
-valdes[0] = 0;
-valdes[2] = 0;
-// гасим подсветку
-if(sensors_param.cfgdes[7]){valdes[3] = 4095;}
-else{valdes[3] = 0;}
-valdes[1]=0; 
-change_pwm();
+void startfunc(){  // РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РѕРґРёРЅ СЂР°Р· РїСЂРё СЃС‚Р°СЂС‚Рµ РјРѕРґСѓР»СЏ.
+  //sensors_param.cfgdes[12]=sensors_param.cfgdes[12]+1;SAVEOPT
+  valdes[2] = 0; // СЂР°Р·СЂРµС€РµРЅРёРµ СЂР°Р±РѕС‚Р°С‚СЊ РїРѕРґСЃРІРµС‚РєРµ РїРѕ РІСЂРµРјРµРЅРё
+  valdes[4] = 0; // РјРёРЅСѓС‚ РїРѕСЃР»Рµ РїРѕСЃР»РµРґРЅРµРіРѕ РїРѕР»РёРІР°
+  valdes[5] = 0; // РїРµСЂРµРјРµРЅРЅР°СЏ РЅР°Р¶Р°С‚РѕР№ РєРЅРѕРїРєРё
+  // РіР°СЃРёРј РїРѕРґСЃРІРµС‚РєСѓ
+  if(sensors_param.cfgdes[7]){
+    valdes[3] = 4095; // Р·Р°РґР°РЅРёРµ РґР»СЏ РёР·РјРµРЅРµРЅРёСЏ СЏСЂРєРѕСЃС‚Рё РїРѕРґСЃРІРµС‚РєРё
+    for(int8_t i=0; i<3; i++){
+      analogWrite(i,4095);
+      delay(2);
+    }
+    valdes[0] = 4095; // С‚РµРєСѓС‰Р°СЏ СЏСЂРєРѕСЃС‚СЊ РїРѕРґСЃРІРµС‚РєРё
+  }
+  else{
+    valdes[3] = 0;
+    for(int8_t i=0; i<3; i++){
+      analogWrite(i,0);
+      delay(2);
+    }
+    valdes[0] = 0;
+  }
+  valdes[1]=0; // СЏСЂРєРѕСЃС‚СЊ РїРѕРґСЃРІРµС‚РєРё РІ РїСЂРѕС†РµРЅС‚Р°С…
 }
 
-void timerfunc(uint32_t  timersrc) {// раз 1 секунду
-  if(timersrc%60==0){   // раз в минуту
+void timerfunc(uint32_t  timersrc) {// СЂР°Р· 1 СЃРµРєСѓРЅРґСѓ
+  if(valdes[5]){                    // РѕР±СЂР°Р±РѕС‚РєР° РЅР°Р¶Р°С‚РёСЏ РєРЅРѕРїРѕРє РЅР° web-СЃС‚СЂР°РЅРёС†Рµ
+    switch (valdes[5]) {
+      case 1:
+        sensors_param.cfgdes[6]=1;SAVEOPT
+      break;
+      case 2:
+        sensors_param.cfgdes[6]=0;SAVEOPT
+      break;
+      case 3:
+        sensors_param.cfgdes[5]=1;SAVEOPT
+      break;
+      case 4:
+        sensors_param.cfgdes[5]=0;SAVEOPT
+      break;
+      case 5:
+        sensors_param.cfgdes[4]=1;SAVEOPT
+      break;
+      case 6:
+        sensors_param.cfgdes[4]=0;SAVEOPT
+      break;
+    }
+    valdes[5]=0;
+  }
+  if(timersrc%60==10){   // СЂР°Р· РІ РјРёРЅСѓС‚Сѓ
+    valdes[4]++;
     int32_t time_start = 0;
     int32_t time_real = 0;
     int32_t time_stop = 0;
     time_start = sensors_param.cfgdes[8] * 60 + sensors_param.cfgdes[9];
     time_real = time_loc.hour * 60 + time_loc.min;
     time_stop = sensors_param.cfgdes[10] * 60 + sensors_param.cfgdes[11];
-    if(time_start < time_real && time_real < time_stop){  
-      valdes[2] = 1;     // разрешаем работать подсветке по времени
+    if(time_start < time_real && time_real < time_stop){
+      valdes[2] = 1;     // СЂР°Р·СЂРµС€Р°РµРј СЂР°Р±РѕС‚Р°С‚СЊ РїРѕРґСЃРІРµС‚РєРµ РїРѕ РІСЂРµРјРµРЅРё
     }
-    else{               
-      if(valdes[1]>0){  // плавно отключаем если задание больше нуля
-        if(sensors_param.cfgdes[7]){valdes[3] = 4095;}
-        else{valdes[3] = 0;}
-        valdes[1]=0;
-        valdes[2]=0;
-        change_pwm();
-      }
+    else{
+      valdes[2]=0;
     }
-    if(sensors_param.cfgdes[6] && valdes[2]){   // если включена работа PWM
-      if(bh_l<sensors_param.cfgdes[2] || bh_l>sensors_param.cfgdes[1]){ // яркость в пределах диапазона регулирования
-        valdes[3] = convertRange(bh_l, sensors_param.cfgdes[1], sensors_param.cfgdes[2], 4095, 0);
-        valdes[3] = minRangeMax(valdes[3], 0, 4095);
+    if(sensors_param.cfgdes[6] && valdes[2]){   // РµСЃР»Рё РІРєР»СЋС‡РµРЅР° СЂР°Р±РѕС‚Р° PWM РёР»Рё СЂР°Р±РѕС‚Р° РїРѕ РІСЂРµРјРµРЅРё
+      int32_t bridges = 0;
+      bridges = analogRead(3);
+      if(bridges<sensors_param.cfgdes[2] || bridges>sensors_param.cfgdes[1]){ // СЏСЂРєРѕСЃС‚СЊ РІ РїСЂРµРґРµР»Р°С… РґРёР°РїР°Р·РѕРЅР° СЂРµРіСѓР»РёСЂРѕРІР°РЅРёСЏ
+        valdes[3]=convertRange(bridges, sensors_param.cfgdes[1], sensors_param.cfgdes[2], 4095, 0);
+        valdes[3]=minRangeMax(valdes[3], 0, 4095);
         valdes[1]=convertRange(valdes[3], 0, 4095, 0, 100);
-        if(sensors_param.cfgdes[7]){valdes[3] = 4095 - valdes[3];}
-        change_pwm();
       }
-      if(bh_l>sensors_param.cfgdes[2] && valdes[1]>0){ // яркость больше максимума и задание больше минимума 
-        if(sensors_param.cfgdes[7]){valdes[3] = 4095;}
-        else{valdes[3] = 0;}
+      if(bridges>=sensors_param.cfgdes[2]){ // СЏСЂРєРѕСЃС‚СЊ Р±РѕР»СЊС€Рµ РјР°РєСЃРёРјСѓРјР°
+        valdes[3]=0;
         valdes[1]=0;
-        change_pwm();
       }
-      if(bh_l<sensors_param.cfgdes[1] && valdes[1]<100){ // яркость меньше минимума и задание PWM меньше максимума  
-        if(sensors_param.cfgdes[7]){valdes[3] = 0;}
-        else{valdes[3] = 4095;}
+      if(bridges<=sensors_param.cfgdes[1]){ // СЏСЂРєРѕСЃС‚СЊ РјРµРЅСЊС€Рµ РјРёРЅРёРјСѓРјР°
+        valdes[3]=4095;
         valdes[1]=100;
-        change_pwm();
       }
     }
-    if(sensors_param.cfgdes[5]){   // если включена работа насоса     
-      if(analogRead(0)>sensors_param.cfgdes[0] && digitalRead(22)){ // при сухой земле и воде в бачке
-        digitalWrite(19,1);
-        delay(sensors_param.cfgdes[3]);
-        digitalWrite(19,0);
+    else{ // РЅРµС‚ СЂР°Р·СЂРµС€РµРЅРёСЏ СЂР°Р±РѕС‚С‹ РїРѕРґСЃРІРµС‚РєРё
+      valdes[3] = 0;
+      valdes[1]=0;
+    }
+    if(sensors_param.cfgdes[5] && sensors_param.cfgdes[12]<valdes[4]){
+         // РµСЃР»Рё РІРєР»СЋС‡РµРЅР° СЂР°Р±РѕС‚Р° РЅР°СЃРѕСЃР° Рё РІС‹С€Р»Рѕ РІСЂРµРјСЏ Р·Р°РґРµСЂР¶РєРё РїРѕСЃР»Рµ РїРѕСЃР»РµРґРЅРµРіРѕ РїРѕР»РёРІР°
+      if(analogRead(0)>sensors_param.cfgdes[0] && digitalRead(22)){ // РїСЂРё СЃСѓС…РѕР№ Р·РµРјР»Рµ Рё РІРѕРґРµ РІ Р±Р°С‡РєРµ
+          valdes[4]=0;
+          digitalWrite(19,1);
+          delay(sensors_param.cfgdes[3]);
+          digitalWrite(19,0);
       }
     }
-  } 
+    if(!sensors_param.cfgdes[5]){valdes[4]=sensors_param.cfgdes[12];}
+  }
+  change_pwm();
   vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
-void change_pwm() { // изменение яркости подсветки
+void change_pwm() { // РёР·РјРµРЅРµРЅРёРµ СЏСЂРєРѕСЃС‚Рё РїРѕРґСЃРІРµС‚РєРё
+  int32_t bufpwm = 0;
   int32_t green = 0;
-  int32_t ch_pwm = 0;
-  int32_t status_pwm = 0;
   int32_t rgb_pwm[3] = {0,0,0};
   if(sensors_param.cfgdes[7]){green = 4095;}
-  if(valdes[0] > valdes[3]){ // если задание меньше яркости
-    ch_pwm = valdes[0] - valdes[3];
-    status_pwm = valdes[0];
-    valdes[0] = valdes[3];
-    for(int32_t i=0; i<ch_pwm; i++){ // плавное изменение яркости
-      status_pwm--;
-      rgb_pwm[0] = status_pwm;
-      if(!sensors_param.cfgdes[4]){
-        rgb_pwm[1] = green;
-      }
-      else{rgb_pwm[1] = status_pwm; }
-      rgb_pwm[2] = status_pwm;
+  if(valdes[0] > valdes[3]){ // РµСЃР»Рё Р·Р°РґР°РЅРёРµ РјРµРЅСЊС€Рµ СЏСЂРєРѕСЃС‚Рё
+    if(valdes[0]-valdes[3]>20){valdes[0]=valdes[0]-20;}
+    else{valdes[0]=valdes[3];}
+      if(sensors_param.cfgdes[7]){bufpwm = 4095 - valdes[0];}
+      else{bufpwm = valdes[0];}
+      rgb_pwm[0] = bufpwm;
+      if(!sensors_param.cfgdes[4]){rgb_pwm[1] = green;} // РµСЃР»Рё РѕС‚РєР»СЋС‡РµРЅ Р·РµР»С‘РЅС‹Р№
+      else{rgb_pwm[1] = bufpwm;}
+      rgb_pwm[2] = bufpwm;
       analogWrite(0,rgb_pwm[0]);
       delay(2);
-      analogWrite(1,rgb_pwm[1]); 
+      analogWrite(1,rgb_pwm[1]);
       delay(2);
       analogWrite(2,rgb_pwm[2]);
-      delay(15);
-    }
+      delay(2);
   }
-  if(valdes[0] < valdes[3]){ // если задание больше яркости
-    ch_pwm = valdes[3] - valdes[0];
-    status_pwm = valdes[0];
-    valdes[0] = valdes[3];
-    for(int32_t i=0; i<ch_pwm; i++){ // плавное изменение яркости
-      status_pwm++;
-      rgb_pwm[0] = status_pwm;
-      if(!sensors_param.cfgdes[4]){
-        rgb_pwm[1] = green;
-      }
-      else{rgb_pwm[1] = status_pwm; }
-      rgb_pwm[2] = status_pwm;
+  if(valdes[0]<valdes[3]){ // РµСЃР»Рё Р·Р°РґР°РЅРёРµ Р±РѕР»СЊС€Рµ СЏСЂРєРѕСЃС‚Рё
+    if(valdes[3]-valdes[0]>20){valdes[0]=valdes[0]+20;}
+    else{valdes[0]=valdes[3];}
+      if(sensors_param.cfgdes[7]){bufpwm = 4095 - valdes[0];}
+      else{bufpwm = valdes[0];}
+      rgb_pwm[0] = bufpwm;
+      if(!sensors_param.cfgdes[4]){rgb_pwm[1] = green;}
+      else{rgb_pwm[1] = bufpwm;}
+      rgb_pwm[2] = bufpwm;
       analogWrite(0,rgb_pwm[0]);
       delay(2);
-      analogWrite(1,rgb_pwm[1]); 
+      analogWrite(1,rgb_pwm[1]);
       delay(2);
       analogWrite(2,rgb_pwm[2]);
-      delay(15);
-    }
+      delay(2);
+  }
+  if(valdes[0]==valdes[3]){ // РµСЃР»Рё Р·Р°РґР°РЅРёРµ СЂР°РІРЅРѕ СЏСЂРєРѕСЃС‚Рё
+      if(sensors_param.cfgdes[7]){bufpwm = 4095 - valdes[0];}
+      else{bufpwm = valdes[0];}
+      if(!sensors_param.cfgdes[4]){rgb_pwm[1] = green;}
+      else{rgb_pwm[1] = bufpwm;}
+      analogWrite(1,rgb_pwm[1]);
+      delay(2);
   }
 }
 
-int32_t convertRange(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max){ // изменение диапазона
+int32_t convertRange(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max){ // РёР·РјРµРЅРµРЅРёРµ РґРёР°РїР°Р·РѕРЅР°
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-int32_t minRangeMax(int32_t x, int32_t in_min, int32_t in_max){ // ограничение диапазона
+int32_t minRangeMax(int32_t x, int32_t in_min, int32_t in_max){ // РѕРіСЂР°РЅРёС‡РµРЅРёРµ РґРёР°РїР°Р·РѕРЅР°
 	if (x > in_max) {x = in_max;}
 	if (x < in_min) {x = in_min;}
 	return x;
 }
 
-void webfunc(char *pbuf) { // вывод данных на главной модуля
-  os_sprintf(HTTPBUFF,"Освещение: %d lx<br>",bh_l);
-  os_sprintf(HTTPBUFF,"Подсветка: <progress value='%d' max='100'></progress> %d%%<br>",valdes[1],valdes[1]);
-  if(analogRead(0)<sensors_param.cfgdes[0]){os_sprintf(HTTPBUFF,"Влажность почвы <b><font color='green'>в норме</font></b><br>");}
-  else{os_sprintf(HTTPBUFF,"Влажность почвы <b><font color='red'><blink>низкая</blink></font></b><br>");}
-  if(!digitalRead(22)){os_sprintf(HTTPBUFF,"<b><font color='red'>Вода в баке <blink>закончилась!</blink></font></b><br>");}
-  os_sprintf(HTTPBUFF,"<hr><br>");
-  if(valdes[2]){
-    os_sprintf(HTTPBUFF,"<a><div class='g_1 k fll' style='width:120px;background:green'>Освещение</div></a>");
+void webfunc(char *pbuf) { // РІС‹РІРѕРґ РґР°РЅРЅС‹С… РЅР° РіР»Р°РІРЅРѕР№ РјРѕРґСѓР»СЏ
+  os_sprintf(HTTPBUFF,"РћСЃРІРµС‰РµРЅРёРµ: %d (0-4095)<br>",adc1_get_raw(3));
+  os_sprintf(HTTPBUFF,"РџРѕРґСЃРІРµС‚РєР° Р·Р°РґР°РЅРёРµ: <progress value='%d' max='100'></progress> %d%%<br>",valdes[1],valdes[1]);
+  //os_sprintf(HTTPBUFF,"РџРѕРґСЃРІРµС‚РєР° С‚РµРєСѓС‰Р°СЏ: <progress value='%d' max='4095'></progress> %d<br>",valdes[0],valdes[0]);
+  if(analogRead(0)<sensors_param.cfgdes[0]){os_sprintf(HTTPBUFF,"Р’Р»Р°Р¶РЅРѕСЃС‚СЊ РїРѕС‡РІС‹ <b><font color='green'>РІ РЅРѕСЂРјРµ</font></b><br>");}
+  else{os_sprintf(HTTPBUFF,"Р’Р»Р°Р¶РЅРѕСЃС‚СЊ РїРѕС‡РІС‹ <b><font color='red'><blink>РЅРёР·РєР°СЏ</blink></font></b><br>");}
+  if(!digitalRead(22)){os_sprintf(HTTPBUFF,"<b><font color='red'>Р’РѕРґР° РІ Р±Р°РєРµ <blink>Р·Р°РєРѕРЅС‡РёР»Р°СЃСЊ!</blink></font></b><br>");}
+    os_sprintf(HTTPBUFF,"<hr><br>");
+  if(sensors_param.cfgdes[6]){
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(2);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>РћСЃРІРµС‰РµРЅРёРµ</b></button>");
   }
   else{
-    os_sprintf(HTTPBUFF,"<a><div class='g_1 k fll' style='width:120px;background:grey'>Освещение</div></a>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(1);repage()' style='width:100px;height:20px;background:grey'><b>РћСЃРІРµС‰РµРЅРёРµ</b></button>");
   }
   if(sensors_param.cfgdes[5]){
-    os_sprintf(HTTPBUFF,"<a><div class='g_1 k fll' style='width:120px;background:green'>Полив</div></a>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(4);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>РџРѕР»РёРІ</b></button>");
   }
   else{
-    os_sprintf(HTTPBUFF,"<a><div class='g_1 k fll' style='width:120px;background:grey'>Полив</div></a>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(3);repage()' style='width:100px;height:20px;background:grey'><b>РџРѕР»РёРІ</b></button>");
   }
   if(sensors_param.cfgdes[4]){
-    os_sprintf(HTTPBUFF,"<a><div class='g_1 k fll' style='width:120px;background:green'>Зелёный вкл.</div></a><br>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(6);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Р—РµР»С‘РЅС‹Р№</b></button><br>");
   }
   else{
-    os_sprintf(HTTPBUFF,"<a><div class='g_1 k fll' style='width:120px;background:grey'>Зелёный вкл.</div></a><br>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(5);repage()' style='width:100px;height:20px;background:grey'><b>Р—РµР»С‘РЅС‹Р№</b></button><br>");
   }
-  os_sprintf(HTTPBUFF,"<br><b>Время работы освешения:</b>");
-  os_sprintf(HTTPBUFF,"<b> с %d:%d по %d:%d </b><br>",sensors_param.cfgdes[8],sensors_param.cfgdes[9],sensors_param.cfgdes[10],sensors_param.cfgdes[11]);
+  os_sprintf(HTTPBUFF,"<script>var request = new XMLHttpRequest();function reqReadyStateChange(){if(request.readyState == 4){var status = request.status;if (status == 200) {document.getElementById('output').innerHTML=request.responseText;}}}function func(valdesset){request.open('GET', 'valdes?int=5&set='+valdesset);request.onreadystatechange = reqReadyStateChange;request.send();   }function repage(){setTimeout('location.reload(true);', 2000);}</script>");
+
+  os_sprintf(HTTPBUFF,"<br><b>Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РѕСЃРІРµС‰РµРЅРёСЏ:</b>");
+  os_sprintf(HTTPBUFF,"<b> СЃ %d:%d РїРѕ %d:%d </b><br>",sensors_param.cfgdes[8],sensors_param.cfgdes[9],sensors_param.cfgdes[10],sensors_param.cfgdes[11]);
+  os_sprintf(HTTPBUFF,"<b>Р’СЂРµРјСЏ РїРѕСЃР»Рµ РїРѕСЃР»РµРґРЅРµРіРѕ РїРѕР»РёРІР° РјРёРЅ.: %d </b><br>",valdes[4]);
   os_sprintf(HTTPBUFF,"<hr>");
   os_sprintf(HTTPBUFF,"ADC %d<br>",analogRead(0));
-  os_sprintf(HTTPBUFF,"Free memory: %d b.<br>",system_get_free_heap_size());
-  os_sprintf(HTTPBUFF,"Непрерывная работа: %d дней, %d:%d:%d <hr>",timer_uptime.day,timer_uptime.hour,timer_uptime.min,timer_uptime.sec);
+    os_sprintf(HTTPBUFF,"<div id='output'></div>");
+//  os_sprintf(HTTPBUFF,"Free memory: %d b.<br>",system_get_free_heap_size());
+//  os_sprintf(HTTPBUFF,"РќРµРїСЂРµСЂС‹РІРЅР°СЏ СЂР°Р±РѕС‚Р°: %d РґРЅРµР№, %d:%d:%d <hr>",timer_uptime.day,timer_uptime.hour,timer_uptime.min,timer_uptime.sec);
 }

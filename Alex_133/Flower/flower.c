@@ -8,6 +8,8 @@
 // valdes[1] - задание ШИМ в %
 // valdes[2] - разрешение работать по времени
 // valdes[3] - текущее задание ШИМ
+// valdes[4] - минут после последнего полива
+// valdes[5] - комманда от кнопок с web-страницы
 
 void startfunc(){  // выполняется один раз при старте модуля.
   //sensors_param.cfgdes[12]=sensors_param.cfgdes[12]+1;SAVEOPT
@@ -16,44 +18,46 @@ void startfunc(){  // выполняется один раз при старте
   valdes[5] = 0; // переменная нажатой кнопки
   // гасим подсветку
   if(sensors_param.cfgdes[7]){
-    valdes[3] = 4095; // задание для изменения яркости подсветки
     for(int8_t i=0; i<3; i++){
       analogWrite(i,4095);
       delay(2);
     }
-    valdes[0] = 4095; // текущая яркость подсветки
   }
   else{
-    valdes[3] = 0;
     for(int8_t i=0; i<3; i++){
       analogWrite(i,0);
       delay(2);
     }
-    valdes[0] = 0;
   }
-  valdes[1]=0; // яркость подсветки в процентах
+  valdes[3]=0;   // задание для подсветки
+  valdes[0]=0;   // текущая яркость позсветки
+  valdes[1]=0;   // яркость подсветки в процентах
 }
 
 void timerfunc(uint32_t  timersrc) {// раз 1 секунду
   if(valdes[5]){                    // обработка нажатия кнопок на web-странице
-    switch (valdes[5]) {
+    int32_t buf = valdes[5]/1000000;
+    switch (buf) {
       case 1:
-        sensors_param.cfgdes[6]=1;SAVEOPT
+        sensors_param.cfgdes[6]=valdes[5]%1000000;SAVEOPT
       break;
       case 2:
-        sensors_param.cfgdes[6]=0;SAVEOPT
+        sensors_param.cfgdes[5]=valdes[5]%1000000;SAVEOPT
       break;
       case 3:
-        sensors_param.cfgdes[5]=1;SAVEOPT
+        sensors_param.cfgdes[4]=valdes[5]%1000000;SAVEOPT
       break;
       case 4:
-        sensors_param.cfgdes[5]=0;SAVEOPT
+        sensors_param.cfgdes[8]=valdes[5]%1000000;SAVEOPT
       break;
       case 5:
-        sensors_param.cfgdes[4]=1;SAVEOPT
+        sensors_param.cfgdes[9]=valdes[5]%1000000;SAVEOPT
       break;
       case 6:
-        sensors_param.cfgdes[4]=0;SAVEOPT
+        sensors_param.cfgdes[10]=valdes[5]%1000000;SAVEOPT
+      break;
+      case 7:
+        sensors_param.cfgdes[11]=valdes[5]%1000000;SAVEOPT
       break;
     }
     valdes[5]=0;
@@ -146,10 +150,12 @@ void change_pwm() { // изменение яркости подсветки
       delay(2);
   }
   if(valdes[0]==valdes[3]){ // если задание равно яркости
-      if(sensors_param.cfgdes[7]){bufpwm = 4095 - valdes[0];}
-      else{bufpwm = valdes[0];}
       if(!sensors_param.cfgdes[4]){rgb_pwm[1] = green;}
-      else{rgb_pwm[1] = bufpwm;}
+      else{
+        if(sensors_param.cfgdes[7]){bufpwm = 4095 - valdes[0];}
+        else{bufpwm = valdes[0];}
+        rgb_pwm[1] = bufpwm;
+      }
       analogWrite(1,rgb_pwm[1]);
       delay(2);
   }
@@ -169,36 +175,45 @@ void webfunc(char *pbuf) { // вывод данных на главной мод
   os_sprintf(HTTPBUFF,"Освещение: %d (0-4095)<br>",adc1_get_raw(3));
   os_sprintf(HTTPBUFF,"Подсветка задание: <progress value='%d' max='100'></progress> %d%%<br>",valdes[1],valdes[1]);
   //os_sprintf(HTTPBUFF,"Подсветка текущая: <progress value='%d' max='4095'></progress> %d<br>",valdes[0],valdes[0]);
-  if(analogRead(0)<sensors_param.cfgdes[0]){os_sprintf(HTTPBUFF,"Влажность почвы <b><font color='green'>в норме</font></b><br>");}
-  else{os_sprintf(HTTPBUFF,"Влажность почвы <b><font color='red'><blink>низкая</blink></font></b><br>");}
+  if(analogRead(0)<sensors_param.cfgdes[0]){os_sprintf(HTTPBUFF,"Влажность почвы <b><font color='green'>в норме</font></b> (%d)<br>",analogRead(0));}
+  else{os_sprintf(HTTPBUFF,"Влажность почвы <b><font color='red'><blink>низкая</blink></font></b> (%d)<br>",analogRead(0));}
   if(!digitalRead(22)){os_sprintf(HTTPBUFF,"<b><font color='red'>Вода в баке <blink>закончилась!</blink></font></b><br>");}
-    os_sprintf(HTTPBUFF,"<hr><br>");
+  os_sprintf(HTTPBUFF,"Время после последнего полива : %d минут<br>",valdes[4]);
+    os_sprintf(HTTPBUFF,"<hr>");
+    os_sprintf(HTTPBUFF,"<b>Контроль функций:</b><br>");
   if(sensors_param.cfgdes[6]){
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(2);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Освещение</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(1, 0);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Освещение</b></button>");
   }
   else{
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(1);repage()' style='width:100px;height:20px;background:grey'><b>Освещение</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(1, 1);repage()' style='width:100px;height:20px;background:grey'><b>Освещение</b></button>");
   }
   if(sensors_param.cfgdes[5]){
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(4);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Полив</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(2, 0);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Полив</b></button>");
   }
   else{
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(3);repage()' style='width:100px;height:20px;background:grey'><b>Полив</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(2, 1);repage()' style='width:100px;height:20px;background:grey'><b>Полив</b></button>");
   }
   if(sensors_param.cfgdes[4]){
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(6);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Зелёный</b></button><br>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(3, 0);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Зелёный</b></button>");
   }
   else{
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(5);repage()' style='width:100px;height:20px;background:grey'><b>Зелёный</b></button><br>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(3, 1);repage()' style='width:100px;height:20px;background:grey'><b>Зелёный</b></button>");
   }
-  os_sprintf(HTTPBUFF,"<script>var request = new XMLHttpRequest();function reqReadyStateChange(){if(request.readyState == 4){var status = request.status;if (status == 200) {document.getElementById('output').innerHTML=request.responseText;}}}function func(valdesset){request.open('GET', 'valdes?int=5&set='+valdesset);request.onreadystatechange = reqReadyStateChange;request.send();   }function repage(){setTimeout('location.reload(true);', 2000);}</script>");
+  os_sprintf(HTTPBUFF,"<div class='c'><div class='main'><b>Время работы освещения:</b><pre><table name='table1'border='0'class='catalogue'><tr style='background-color: yellow'><td> часы </td><td> минуты </td><td> часы </td><td> минуты</td></tr>");
+  os_sprintf(HTTPBUFF,"<tr><td>c <INPUT size=2 NAME='cfg8'id='cfg8'value='%02d'></td><td> <INPUT size=2 NAME='cfg9'id='cfg9'value='%02d'></td><td> по <INPUT size=2 NAME='cfg10' id='cfg10' value='%02d'></td><td><INPUT size=2 NAME='cfg11'id='cfg11'value='%02d'></td></tr></table><br>",sensors_param.cfgdes[8],sensors_param.cfgdes[9],sensors_param.cfgdes[10],sensors_param.cfgdes[11]);
+  os_sprintf(HTTPBUFF,"<button type='button' onclick='func2()'style='width:100px;height:20px;background:grey'><b>Принять</b></button></pre></div>");
 
-  os_sprintf(HTTPBUFF,"<br><b>Время работы освещения:</b>");
-  os_sprintf(HTTPBUFF,"<b> с %d:%d по %d:%d </b><br>",sensors_param.cfgdes[8],sensors_param.cfgdes[9],sensors_param.cfgdes[10],sensors_param.cfgdes[11]);
-  os_sprintf(HTTPBUFF,"<b>Время после последнего полива мин.: %d </b><br>",valdes[4]);
+
+  os_sprintf(HTTPBUFF,"<script>var request = new XMLHttpRequest();");
+  os_sprintf(HTTPBUFF,"function reqReadyStateChange(){if(request.readyState == 4){var status = request.status;if (status == 200) {document.getElementById('output').innerHTML=request.responseText+ ' wait data save...';}}}");
+  os_sprintf(HTTPBUFF,"function func(confset, valset){valset=parseInt(valset);valset=confset*1000000+valset;request.open('GET', 'valdes?int=5&set='+valset, true);request.onreadystatechange = reqReadyStateChange;request.send();}");
+  os_sprintf(HTTPBUFF,"function func2(){func(4, cfg8.value);setTimeout('func(5, cfg9.value);', 2000);setTimeout('func(6, cfg10.value);', 4000);setTimeout('func(7, cfg11.value);', 6000);setTimeout('repage();', 6000);}");
+  os_sprintf(HTTPBUFF,"function repage(){setTimeout('location.reload(true);', 2000);}</script>");
+
+  //os_sprintf(HTTPBUFF,"<b> с %d:%d по %d:%d </b><br>",sensors_param.cfgdes[8],sensors_param.cfgdes[9],sensors_param.cfgdes[10],sensors_param.cfgdes[11]);
   os_sprintf(HTTPBUFF,"<hr>");
-  os_sprintf(HTTPBUFF,"ADC %d<br>",analogRead(0));
+  //os_sprintf(HTTPBUFF,"ADC %d<br>",analogRead(0));
     os_sprintf(HTTPBUFF,"<div id='output'></div>");
-//  os_sprintf(HTTPBUFF,"Free memory: %d b.<br>",system_get_free_heap_size());
+ // os_sprintf(HTTPBUFF,"<noscript><meta http-equiv='REFRESH' content='60'></noscript>");
 //  os_sprintf(HTTPBUFF,"Непрерывная работа: %d дней, %d:%d:%d <hr>",timer_uptime.day,timer_uptime.hour,timer_uptime.min,timer_uptime.sec);
 }

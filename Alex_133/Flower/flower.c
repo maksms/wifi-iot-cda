@@ -59,6 +59,14 @@ void timerfunc(uint32_t  timersrc) {// раз 1 секунду
       case 7:
         sensors_param.cfgdes[11]=valdes[5]%1000000;SAVEOPT
       break;
+      case 8:
+        if(digitalRead(22)){ // при воде в бачке
+          valdes[4]=0;
+          digitalWrite(19,1);
+          delay(sensors_param.cfgdes[3]);
+          digitalWrite(19,0);
+        }
+      break;
     }
     valdes[5]=0;
   }
@@ -179,27 +187,28 @@ void webfunc(char *pbuf) { // вывод данных на главной мод
   else{os_sprintf(HTTPBUFF,"Влажность почвы <b><font color='red'><blink>низкая</blink></font></b> (%d)<br>",analogRead(0));}
   if(!digitalRead(22)){os_sprintf(HTTPBUFF,"<b><font color='red'>Вода в баке <blink>закончилась!</blink></font></b><br>");}
   os_sprintf(HTTPBUFF,"Время после последнего полива : %d минут<br>",valdes[4]);
+  os_sprintf(HTTPBUFF,"<button type='button' onclick='func(8, 0);repage()' style='width:150px;height:20px;color:#FFF;background:green'><b>Полить один раз</b></button>");
     os_sprintf(HTTPBUFF,"<hr>");
     os_sprintf(HTTPBUFF,"<b>Контроль функций:</b><br>");
   if(sensors_param.cfgdes[6]){
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(1, 0);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Освещение</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(1, 0);repage()' style='width:130px;height:20px;color:#FFF;background:green'><b>Освещение авто</b></button>");
   }
   else{
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(1, 1);repage()' style='width:100px;height:20px;background:grey'><b>Освещение</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(1, 1);repage()' style='width:130px;height:20px;background:grey'><b>Освещение выкл</b></button>");
   }
   if(sensors_param.cfgdes[5]){
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(2, 0);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Полив</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(2, 0);repage()' style='width:130px;height:20px;color:#FFF;background:green'><b>Полив авто</b></button>");
   }
   else{
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(2, 1);repage()' style='width:100px;height:20px;background:grey'><b>Полив</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(2, 1);repage()' style='width:130px;height:20px;background:grey'><b>Полив выкл</b></button>");
   }
   if(sensors_param.cfgdes[4]){
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(3, 0);repage()' style='width:100px;height:20px;color:#FFF;background:green'><b>Зелёный</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(3, 0);repage()' style='width:130px;height:20px;color:#FFF;background:green'><b>Зелёный вкл</b></button>");
   }
   else{
-    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(3, 1);repage()' style='width:100px;height:20px;background:grey'><b>Зелёный</b></button>");
+    os_sprintf(HTTPBUFF,"<button type='button' onclick='func(3, 1);repage()' style='width:130px;height:20px;background:grey'><b>Зелёный выкл</b></button>");
   }
-  os_sprintf(HTTPBUFF,"<div class='c'><div class='main'><b>Время работы освещения:</b><pre><table name='table1'border='0'class='catalogue'><tr style='background-color: yellow'><td> часы </td><td> минуты </td><td> часы </td><td> минуты</td></tr>");
+  os_sprintf(HTTPBUFF,"<div class='c'><div class='main'><pre><table name='table1'border='0'class='catalogue'><b>Время работы освещения:</b><tr style='background-color: yellow'><td> часы </td><td> минуты </td><td> часы </td><td> минуты</td></tr>");
   os_sprintf(HTTPBUFF,"<tr><td>c <INPUT size=2 NAME='cfg8'id='cfg8'value='%02d'></td><td> <INPUT size=2 NAME='cfg9'id='cfg9'value='%02d'></td><td> по <INPUT size=2 NAME='cfg10' id='cfg10' value='%02d'></td><td><INPUT size=2 NAME='cfg11'id='cfg11'value='%02d'></td></tr></table><br>",sensors_param.cfgdes[8],sensors_param.cfgdes[9],sensors_param.cfgdes[10],sensors_param.cfgdes[11]);
   os_sprintf(HTTPBUFF,"<button type='button' onclick='func2()'style='width:100px;height:20px;background:grey'><b>Принять</b></button></pre></div>");
 

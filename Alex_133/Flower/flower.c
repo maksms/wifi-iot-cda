@@ -71,6 +71,7 @@ void timerfunc(uint32_t  timersrc) {// раз 1 секунду
     valdes[5]=0;
   }
   if(timersrc%60==10){   // раз в минуту
+    static int32_t sum_en=0;
     valdes[4]++;
     int32_t time_start = 0;
     int32_t time_real = 0;
@@ -107,11 +108,16 @@ void timerfunc(uint32_t  timersrc) {// раз 1 секунду
     }
     if(sensors_param.cfgdes[5] && sensors_param.cfgdes[12]<valdes[4]){
          // если включена работа насоса и вышло время задержки после последнего полива
-      if(analogRead(0)>sensors_param.cfgdes[0] && digitalRead(22)){ // при сухой земле и воде в бачке
+      if(digitalRead(22)){ // при воде в бачке
+        if(analogRead(0)>sensors_param.cfgdes[0]){sum_en++;} // при сухой земле
+        else{sum_en=0;}
+        if(sum_en >= 2 && valdes[2]){ // в период времени  работы подсветки и срабатывани датчика влажности 2 раза подряд
           valdes[4]=0;
           digitalWrite(19,1);
           delay(sensors_param.cfgdes[3]);
           digitalWrite(19,0);
+          sum_en=0;
+        }
       }
     }
     if(!sensors_param.cfgdes[5]){valdes[4]=sensors_param.cfgdes[12];}

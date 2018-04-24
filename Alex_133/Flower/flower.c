@@ -197,7 +197,7 @@ void webfunc(char *pbuf) { // вывод данных на главной мод
   if(buf>=sensors_param.cfgdes[0]&&buf<sensors_param.cfgdes[13]){os_sprintf(HTTPBUFF,"Влажность почвы <b><font color='red'><blink>низкая</blink></font></b> (%d)<br>",buf);}
   if(buf>sensors_param.cfgdes[13]){os_sprintf(HTTPBUFF,"Влажность почвы <b><font color='red'><blink>недостоверная</blink></font></b> (%d)<br>",buf);}
   if(!digitalRead(22)){os_sprintf(HTTPBUFF,"<b><font color='red'>Вода в баке <blink>закончилась!</blink></font></b><br>");}
-  os_sprintf(HTTPBUFF,"Время после последнего полива : %d минут<br>",valdes[4]);
+  os_sprintf(HTTPBUFF,"После полива : %d д. %d ч. %d мин.<br>",valdes[4]/1440,valdes[4]/60%24,valdes[4]%60);
   
   if(valdes[6]){
     os_sprintf(HTTPBUFF,"<button type='button' onclick='func(6, 0);repage()' style='width:195px;height:20px;color:#FFF;background:#00FF00'><b>Выкл освещение раньше</b></button>");

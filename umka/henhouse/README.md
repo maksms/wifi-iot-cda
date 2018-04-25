@@ -37,7 +37,7 @@
 
 {"hardware":{"interval":2,"i2c":{"scl":3,"sda":1},"bh1750":{"en":0}}}
 
-{"servers":{"narodmon":{"en":0,"interval":5},"flymon":{"en":1},"mqtt":{"en":1,"interval":10,"server":"mqtt.wifi-iot.com","port":1883,"login":"mailumka2@gmail.com","passw":"8vfhnf"}}}
+{"servers":{"narodmon":{"en":0,"interval":5},"flymon":{"en":1},"mqtt":{"en":1,"interval":10,"server":"mqtt.wifi-iot.com","port":1883,"login":"xxx","passw":"xxx"}}}
 
 {"thermostat":{"termo1":{"en":1,"sensor":31,"min":10,"max":11,"gpio":14}}}
 

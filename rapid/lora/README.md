@@ -15,7 +15,8 @@
 
 ![lora](bot.jpg "lora")
 
-[алгоритм передачи данных](http://www.homes-smart.ru/index.php/oborudovanie/bez-provodov-433-315mgts/45-odin-iz-algoritmov-peredachi-dannykh-v-vide-tsifrovogo-koda ).
+Необходимые для производства плат gerber-файлы и файл сверловки отверстий можно скачать [тут](https://github.com/maksms/wifi-iot-cda/blob/master/rapid/lora/ESP32_RFM95V2.rar) 
+
 
 Для компиляции проекта потребуется [установить STVD + COSMIC](http://www.count-zero.ru/2016/stm8_spl_cosmic/)
 

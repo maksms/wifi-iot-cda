@@ -17,6 +17,9 @@
 
 Необходимые для производства плат gerber-файлы и файл сверловки отверстий можно скачать [тут](https://github.com/maksms/wifi-iot-cda/blob/master/rapid/lora/ESP32_RFM95V2.rar) 
 
+Заказать изготовление плат можно например на сайте [www.jlcpcb.com](http://www.jlcpcb.com)
 
+Монтаж радиоэлементов выполнять по следующему чертежу:
+![lora](sborka.jpg "lora")
 Для компиляции проекта потребуется [установить STVD + COSMIC](http://www.count-zero.ru/2016/stm8_spl_cosmic/)
 

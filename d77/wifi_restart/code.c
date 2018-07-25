@@ -4,7 +4,7 @@ startfunc()
 }
 void ICACHE_FLASH_ATTR timerfunc(uint32_t  timersrc) 
 {
-    if ( timersrc!=0 && timersrc%300==0 && mtest != 15 && 1000 < wfrc ) system_restart() ;
+    if ( timersrc!=0 && timersrc%300==0 &&  ( mtest != 15 || 1000 < wfrc )) system_restart() ;
 }
 void webfunc(char *pbuf) 
 {

@@ -1,7 +1,7 @@
 water level in a tank
 =====================
 
-датчик HC-SR04
+Г¤Г ГІГ·ГЁГЄ HC-SR04
 
 ![water level in a tank](Screenshot_1.png "water level in a tank")
 
@@ -15,8 +15,8 @@ water level in a tank
 
 ![water level in a tank](Screenshot_6.png "water level in a tank")
 
-![water level in a tank](Screenshot_7.png "настройки в кк")
+![water level in a tank](Screenshot_7.png "Г­Г Г±ГІГ°Г®Г©ГЄГЁ Гў ГЄГЄ")
 
-![water level in a tank](Screenshot_8.png "список опций")
+![water level in a tank](Screenshot_8.png "Г±ГЇГЁГ±Г®ГЄ Г®ГЇГ¶ГЁГ©")
 
-![water level in a tank](Screenshot_8.png "настройки на модуле")
+![water level in a tank](Screenshot_9.png "Г­Г Г±ГІГ°Г®Г©ГЄГЁ Г­Г  Г¬Г®Г¤ГіГ«ГҐ")

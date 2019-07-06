@@ -4,7 +4,7 @@ soft_ap_mode()
     wifi_softap_get_config(&apConfig);
     os_sprintf(apConfig.ssid, "LightInHome");                       //имя точки доступа берем хостнэйм
     apConfig.authmode = 4;                                          //0 - без шифрования,4 с шифрованием
-    os_sprintf(apConfig.password, "qwertyuiop");   //пароль точки
+    os_sprintf(apConfig.password, "********");                      //пароль точки
     apConfig.ssid_len = strlen(apConfig.ssid);                      //длина имени точки доступа
     wifi_softap_set_config(&apConfig);                              //применить параметры точки
     wifi_set_opmode(3);                                             //включить точку доступа

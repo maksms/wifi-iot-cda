@@ -1,8 +1,6 @@
 #include "driver/uart.h"
 
-#define MQTTD
-
-#define FW_VER "1.3"
+#define FW_VER "1.5"
 	
 #define DELAYED_START		60   //sec
 #define UART_READ_TIMEOUT	1000  // влияет на результаты чтения из юсарт
@@ -16,7 +14,7 @@
 
 #define pauseTask(delay)  (vTaskDelay(delay / portTICK_PERIOD_MS))
 
-#ifdef MQTTD
+#if mqtte || mqttjsone
 	#define MQTT_SEND_INTERVAL 10 // sec
 	#define MQTT_TOPIC_DISTANCE	"distance"
 	#define MQTT_PAYLOAD_BUF 20
@@ -66,7 +64,7 @@ void get_config_values() {
 	sonar_enabled = (sensors_param.cfgdes[0]  > 0) ? 1 : 0;  // читать данные sonar
 	sonar_read_delay = (sensors_param.cfgdes[0] < 100) ? SONAR_READ_DELAY : sensors_param.cfgdes[0];	
 
-#ifdef MQTTD	
+#if mqtte || mqttjsone	
 	mqtt_send_interval_sec = (sensors_param.cfgdes[1] == 0) ? sensors_param.mqttts : sensors_param.cfgdes[1];		
 #endif	
 	mm_cm = (sensors_param.cfgdes[2] > 0) ? 1 : 0;  
@@ -96,13 +94,9 @@ void timerfunc(uint32_t  timersrc) {
 }
 
 void vSystemStartTimerCallback( TimerHandle_t xTimer ){	
-
-#ifdef DEBUG
-	userlog("\n%s\n", __func__);
-#endif	
 	xTaskCreate(read_distance_task, "read_distance_task", 2048, NULL, 5, NULL); 
 
-#ifdef MQTTD
+#if mqtte || mqttjsone
 	mqtt_send_timer = xTimerCreate("mqtt send timer", pdMS_TO_TICKS( mqtt_send_interval_sec * 1000 ), pdTRUE, 0, vMqttSendTimerCallback);
 	xTimerStart( mqtt_send_timer, 0);
 #endif
@@ -110,10 +104,8 @@ void vSystemStartTimerCallback( TimerHandle_t xTimer ){
 }
 
 void sonar_send () {
-	uint8_t *bytes = malloc(1);
-	bytes[0] = COMMAND;
-	send_buffer(bytes, 1);
-	free(bytes);
+	uint8_t cmd = COMMAND;
+	send_buffer(&cmd, 1);
 }
 
 uint16_t sonar_read() {
@@ -148,6 +140,7 @@ void read_distance_task( void * pvParameters ){
 		sonar_send();
 		distance = sonar_read();
 		uart_flush(UART_NUM_0);
+		valdes[0] = distance;
 		pauseTask(sonar_read_delay);
 	}
 	vTaskDelete(NULL);
@@ -166,7 +159,7 @@ uint8_t read_buffer(uint8_t *buffer, uint8_t cnt){
 }
 
 
-#ifdef MQTTD
+#if mqtte || mqttjsone
 void vMqttSendTimerCallback( TimerHandle_t xTimer ) {
 	if ( sensors_param.mqtten != 1 ) return;
 	memset(payload, 0, MQTT_PAYLOAD_BUF);

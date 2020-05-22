@@ -1,6 +1,6 @@
 #include "driver/uart.h"
 
-#define FW_VER "1.5"
+#define FW_VER "1.6"
 	
 #define DELAYED_START		60   //sec
 #define UART_READ_TIMEOUT	1000  // влияет на результаты чтения из юсарт
@@ -164,7 +164,7 @@ void vMqttSendTimerCallback( TimerHandle_t xTimer ) {
 	if ( sensors_param.mqtten != 1 ) return;
 	memset(payload, 0, MQTT_PAYLOAD_BUF);
 	if ( mm_cm ) {
-		os_sprintf(payload,"%d.%d", (int)distance, 		(int)(distance*10) % 10);
+		os_sprintf(payload,"%d.%d", (uint16_t)distance/10, 		(uint16_t)(distance % 10));
 	} else {
 		os_sprintf(payload,"%d", distance);
 	}

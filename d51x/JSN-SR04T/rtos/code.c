@@ -2,7 +2,7 @@
 
 #define MQTTD
 
-#define FW_VER "1.2"
+#define FW_VER "1.3"
 	
 #define DELAYED_START		60   //sec
 #define UART_READ_TIMEOUT	1000  // влияет на результаты чтения из юсарт
@@ -113,6 +113,7 @@ void sonar_send () {
 	uint8_t *bytes = malloc(1);
 	bytes[0] = COMMAND;
 	send_buffer(bytes, 1);
+	free(bytes);
 }
 
 uint16_t sonar_read() {
@@ -185,11 +186,11 @@ void vMqttSendTimerCallback( TimerHandle_t xTimer ) {
 void webfunc(char *pbuf) {
 
 	if ( delayed_counter > 0 ) {
-		os_sprintf(HTTPBUFF,"<br>До начала чтения данных счетчика осталось %d секунд", delayed_counter);
+		os_sprintf(HTTPBUFF,"До начала чтения данных счетчика осталось %d секунд", delayed_counter);
 	}
 
 	if ( mm_cm ) {
-		os_sprintf(HTTPBUFF,"<br><b>Расcтояние:</b> %d.%d см", 	(uint16_t)distance/10, 		(uint16_t)(distance % 10));
+		os_sprintf(HTTPBUFF,"<b>Расcтояние:</b> %d.%d см", 	(uint16_t)distance/10, 		(uint16_t)(distance % 10));
 	} else {
 		os_sprintf(HTTPBUFF,"<br><b>Расcтояние:</b> %d мм", 	distance);
 	}

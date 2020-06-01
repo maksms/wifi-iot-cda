@@ -6,7 +6,7 @@
 
 ![loranode](loranode.jpg "lora")
 
-Необходимые для производства плат gerber-файлы и файл сверловки отверстий можно скачать [тут](https://github.com/maksms/wifi-iot-cda/blob/master/rapid/lora/loranode.rar) 
+Необходимые для производства плат gerber-файлы и файл сверловки отверстий можно скачать [тут](https://github.com/maksms/wifi-iot-cda/blob/master/rapid/loranode/loranode.rar) 
 
 Заказать изготовление плат можно например на сайте [www.jlcpcb.com](http://www.jlcpcb.com)
 

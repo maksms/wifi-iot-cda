@@ -1,0 +1,18 @@
+if(gpioget(15)==1)
+if(hour>=7&&hour<23)
+gpioset(16,0)
+gpioset(100,1)
+gpioset(101,0)
+else
+gpioset(16,1)
+gpioset(100,0)
+gpioset(101,1)
+endif
+endif
+valset(0,1)
+if(hour>=7&&hour<23)
+valset(0,0)
+endif
+valset(1,gpioget(100))
+valset(2,gpioget(101))
+printd(0,{_VAL1_==1?"Kiturami":"{_VAL2_==1?"Protherm":"--------"}"}   {_GPIO12_&_VAL1_?"HEAT":"{_GPIO14_&_VAL2_?"HEAT":"IDLE"}"}/{_GPIO15_==1?"AUTO":"MANL"})

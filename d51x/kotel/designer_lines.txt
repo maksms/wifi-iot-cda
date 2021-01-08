@@ -1,0 +1,8 @@
+Line1:
+Set [_TSSET1_/10] {_GPIO16_==1?"X2":"  "} Room _VS11_
+
+Line2:
+Out _DSW1_ Return _DSW2_
+
+Line3:
+_TIME_ {_VAL0_==0?"T1":"T2"} Street _VS31_

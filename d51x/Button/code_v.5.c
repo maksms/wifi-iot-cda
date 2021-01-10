@@ -10,6 +10,17 @@
 * v.2 динамическое назначение колбеков для обработчика кнопок вместо хардкода
 */
 
+#define BTN1_PIN 						sensors_param.cfgdes[0]		//	GPIO кнопки           
+#define BTN1_SHORT_PRESS_1_GPIO 		sensors_param.cfgdes[1]		//	короткое нажатие 1 - GPIO или номер конструктора строки ( x 1000 )
+#define BTN1_SHORT_PRESS_2_GPIO 		sensors_param.cfgdes[2]		//	короткое нажатие 2 - GPIO или номер конструктора строки ( x 1000 )
+#define BTN1_SHORT_PRESS_3_GPIO 		sensors_param.cfgdes[3]		//	короткое нажатие 3 - GPIO или номер конструктора строки ( x 1000 )
+#define BTN1_LONG_PRESS_1_GPIO 			sensors_param.cfgdes[4]		//	долгое нажатие 1 - GPIO или номер конструктора строки ( x 1000 )
+#define BTN1_LONG_PRESS_1_TIMEOUT 		sensors_param.cfgdes[5]		//	мсек, длительность долгого нажатия 1
+#define BTN1_LONG_PRESS_2_GPIO 			sensors_param.cfgdes[6]		//	долгое нажатие 2 - GPIO или номер конструктора строки ( x 1000 )
+#define BTN1_LONG_PRESS_2_TIMEOUT 		sensors_param.cfgdes[7]		//	мсек, длительность долгого нажатия 2
+#define BTN1_LONG_PRESS_3_GPIO 			sensors_param.cfgdes[8]		//	долгое нажатие 3 - GPIO или номер конструктора строки ( x 1000 )
+#define BTN1_LONG_PRESS_3_TIMEOUT 		sensors_param.cfgdes[9]		//	мсек, длительность долгого нажатия 3
+
 
 #define BTN_GLITCH_TIME 50
 #define BTN_SHORT_PRESS_TIMEOUT 300
@@ -477,31 +488,18 @@ void button_press_cb(void *args)
 
 void ICACHE_FLASH_ATTR startfunc()
 {
-	/*
-*       sensors_param.cfgdes[0] - GPIO кнопки                              
-*       sensors_param.cfgdes[1] - короткое нажатие 1 - GPIO или номер конструктора строки ( x 1000 )
-*       sensors_param.cfgdes[2] - короткое нажатие 2 - GPIO или номер конструктора строки ( x 1000 )
-*       sensors_param.cfgdes[3] - короткое нажатие 3 - GPIO или номер конструктора строки ( x 1000 )
-*       sensors_param.cfgdes[4] - долгое нажатие 1 - GPIO или номер конструктора строки ( x 1000 )
-*       sensors_param.cfgdes[5] - мсек, длительность долгого нажатия 1
-*       sensors_param.cfgdes[6] - долгое нажатие 2 - GPIO или номер конструктора строки ( x 1000 )
-*       sensors_param.cfgdes[7] - мсек, длительность долгого нажатия 2
-*       sensors_param.cfgdes[8] - долгое нажатие 3 - GPIO или номер конструктора строки ( x 1000 )
-*       sensors_param.cfgdes[9] - мсек, длительность долгого нажатия 3
-    */
-
     // выполняется один раз при старте модуля.
-    if ( sensors_param.cfgdes[0] < 16 )
+    if ( BTN1_PIN < 16 )
     {
-        button = create_button( sensors_param.cfgdes[0] , 0);
+        button = create_button( BTN1_PIN , 0);
 
-        button_add_short_press(button, 1, button_press_cb, &sensors_param.cfgdes[1]);
-        button_add_short_press(button, 2, button_press_cb, &sensors_param.cfgdes[2]);
-        button_add_short_press(button, 3, button_press_cb, &sensors_param.cfgdes[3]);
+        button_add_short_press(button, 1, button_press_cb, &BTN1_SHORT_PRESS_1_GPIO);
+        button_add_short_press(button, 2, button_press_cb, &BTN1_SHORT_PRESS_2_GPIO);
+        button_add_short_press(button, 3, button_press_cb, &BTN1_SHORT_PRESS_3_GPIO);
 
-        button_add_long_press(button, sensors_param.cfgdes[5], button_press_cb, &sensors_param.cfgdes[4]);
-        button_add_long_press(button, sensors_param.cfgdes[7], button_press_cb, &sensors_param.cfgdes[6]);
-        button_add_long_press(button, sensors_param.cfgdes[9], button_press_cb, &sensors_param.cfgdes[8]);
+        button_add_long_press(button, BTN1_LONG_PRESS_1_TIMEOUT, button_press_cb, &BTN1_LONG_PRESS_1_GPIO);
+        button_add_long_press(button, BTN1_LONG_PRESS_2_TIMEOUT, button_press_cb, &BTN1_LONG_PRESS_2_GPIO);
+        button_add_long_press(button, BTN1_LONG_PRESS_3_TIMEOUT, button_press_cb, &BTN1_LONG_PRESS_3_GPIO);
     }
 }
 

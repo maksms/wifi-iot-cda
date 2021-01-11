@@ -1,0 +1,15 @@
+//living
+valset(0,vsens[0][0])
+//bedroom
+if(vsens[1][0]<valget(0))
+valset(0,vsens[1][0])
+endif
+//child1
+if(vsens[1][1]<valget(0))
+valset(0,vsens[1][1])
+endif
+//bath
+if(vsens[0][1]<valget(0))
+valset(0,vsens[0][1])
+endif
+valdesset(5,valget(0))

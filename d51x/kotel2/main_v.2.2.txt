@@ -1,0 +1,8 @@
+<b>Flow: </b>_DSW1_°C<br>
+<b>Return:  </b>_DSW2_°C<br>
+<b>LivingR:    </b>_VS11_°C<br>
+<b>Bedroom:    </b>_VS21_°C<br>
+<b>Child1:    </b>_VS22_°C<br>
+<b>Child2:    </b>_VS31_°C<br>
+<b>Bathroom:    </b>_VS12_°C<br>
+<hr><b>Street:  </b>_VS41_°C<hr>

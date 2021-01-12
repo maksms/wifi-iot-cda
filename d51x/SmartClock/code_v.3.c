@@ -53,13 +53,13 @@ char* text_month[12] = {"янв","фев","мар","апр","май","июн","�
 
 uint8_t mode = 0; // 0 - time, 1 - date, 2 - bedroom temp
                     
-#define matrix_clear_row(section, row) maxOne(section, row, 0);
+// #define matrix_clear_row(section, row) maxOne(section, row, 0);
 
-void ICACHE_FLASH_ATTR matrix_clear(uint8_t section)
-{
-    uint8_t row = 0;
-    for(row=1;row<9;row++) maxOne(section, row, 0);
-}
+// void ICACHE_FLASH_ATTR matrix_clear(uint8_t section)
+// {
+//     uint8_t row = 0;
+//     for(row=1;row<9;row++) maxOne(section, row, 0);
+// }
 
 void ICACHE_FLASH_ATTR matrix_print_dot(uint8_t section, uint8_t row, uint8_t col) 
 {
@@ -100,7 +100,7 @@ void ICACHE_FLASH_ATTR print_date_text_month() {
 
 int8_t ICACHE_FLASH_ATTR round_temp(int32_t temp) 
 {
-    if ( temp%10 < -5) {
+    if ( temp%10 <= -5) {
         return (-1 + temp/10);
     } 
     else if  ( temp%10 < 5) {
@@ -133,8 +133,7 @@ void ICACHE_FLASH_ATTR print_temp_house(uint8_t scroll)
 void ICACHE_FLASH_ATTR print_temp_street(uint8_t scroll) 
 {
     char data[50];
-    int32_t street = (TEMP_STREET > 500 ) ? TEMP_STREET - 1000 : TEMP_STREET;
-    os_sprintf(data,"Улица %s%d°    ", street < 5 ? " " : "+", round_temp( street ));
+    os_sprintf(data,"Улица %s%d°    ", TEMP_STREET < 5 ? " " : "+", round_temp( TEMP_STREET ));
     MATRIX_print (data, 1 , scroll);
 
 }
@@ -228,8 +227,6 @@ uint32_t val = mode;
 }
 
 void webfunc(char *pbuf) {
-
     os_sprintf(HTTPBUFF,"<br><b>Версия прошивки:</b> %s", FW_VER);
-
 }
 

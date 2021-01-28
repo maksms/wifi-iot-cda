@@ -1,4 +1,4 @@
-#define FW_VER "4.1"
+#define FW_VER "4.2"
 
 // Настройки: PIR1 GPIO, active level, func type, func GPIO/CH,OFF delay, Signal GPIO, NightMode,
 // Настройки: PIR2 GPIO, active level, func type, func GPIO/CH,OFF delay, Signal GPIO, NightMode,
@@ -37,7 +37,7 @@
 //#define GPIO_LED_RED 225
 
 #define READ_SENSORS_INTERVAL 20
-
+#define DELAY_MULT 1000				// множитель задержки из cfgdes
 
 #define CFG_SENSOR_FUNC_IDX				0
 #define CFG_SENSOR_DATA_SIZE			7
@@ -173,7 +173,7 @@ void ICACHE_FLASH_ATTR read_sensors_cb()
 				// запустим таймер
 				os_timer_disarm(&_sensors[i].tmr);		
 				os_timer_setfn(&_sensors[i].tmr, (os_timer_func_t *) _sensors[i].tmr_cb, _sensors[i].tmr_args);
-				os_timer_arm(&_sensors[i].tmr, _sensors[i].tmr_delay, 0);					
+				os_timer_arm(&_sensors[i].tmr, _sensors[i].tmr_delay * DELAY_MULT, 0);					
 			}				
 		}
 		

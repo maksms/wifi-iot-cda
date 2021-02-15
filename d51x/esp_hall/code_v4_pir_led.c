@@ -1,4 +1,4 @@
-#define FW_VER "4.2"
+#define FW_VER "4.3"
 
 // Настройки: PIR1 GPIO, active level, func type, func GPIO/CH,OFF delay, Signal GPIO, NightMode,
 // Настройки: PIR2 GPIO, active level, func type, func GPIO/CH,OFF delay, Signal GPIO, NightMode,
@@ -81,6 +81,8 @@
 #define VALDES_IS_DARK					valdes[0]						// выставляется через interpreter по гистерезису освещенности
 #define VALDES_MIN_NIGHT_BRIGTHNESS		valdes[1]						// выставляется через interpreter по времени
 
+#define VALDES_SMOOTH_LED				valdes[2]
+
 //#define BRIGHTNESS_STEPS 20
 //static uint8_t brightness[BRIGHTNESS_STEPS] = {0,1,2,3,4,5,7,9,12,16,21,28,37,48,64,84,111,147,194,255};  
 #define BRIGHTNESS_STEPS 32
@@ -133,6 +135,13 @@ static volatile os_timer_t timer_read_sensors;
 
 static uint8_t is_dark = 0;			// флан ночного режима по датчbre освещенности, при 1 - включаем gpio/pwm
 
+
+
+	int32_t prev_smooth = 0;
+	contact_sensor_t smooth_sens;
+	
+
+
 static void ICACHE_FLASH_ATTR mqtt_send_int(const char *topic, int val)
 {
 	#if mqtte
@@ -143,49 +152,7 @@ static void ICACHE_FLASH_ATTR mqtt_send_int(const char *topic, int val)
 	#endif
 }
 
-void ICACHE_FLASH_ATTR read_sensors_cb()
-{
-	// обработка состояния gpio
-	// если состояние изменилось, то выполним коллбек в зависимости от состояния, а так же запустим таймер для выключенного состояния
-	uint8_t i;
-	for (i = 0; i < USER_SENSOR_MAX; i++ )
-	{
-		uint8_t state = GPIO_ALL_GET(_sensors[i].gpio);
-		state = ( _sensors[i].active_level ) ? state : !state;
-		if ( state == _sensors[i].state ) continue;  // состояние не менялось
-	
-		//uint8_t _state = ( _sensors[i].active_level ) ? state : !state;
-		
-		// состояние изменилось, выполнить callback
-		if ( state ) 
-		{
-			if ( _sensors[i].on != NULL && ( !_sensors[i].dark || ( _sensors[i].dark && is_dark) ) )  // + включаем только в темноте, а выключаем в любое время
-				_sensors[i].on( _sensors[i].on_args );
-				
-		} 
-		else 
-		{
-			if ( _sensors[i].off != NULL )
-				_sensors[i].off( _sensors[i].off_args );			
-				
-			if ( _sensors[i].tmr_delay > 0 && _sensors[i].tmr_cb != NULL )
-			{
-				// запустим таймер
-				os_timer_disarm(&_sensors[i].tmr);		
-				os_timer_setfn(&_sensors[i].tmr, (os_timer_func_t *) _sensors[i].tmr_cb, _sensors[i].tmr_args);
-				os_timer_arm(&_sensors[i].tmr, _sensors[i].tmr_delay * DELAY_MULT, 0);					
-			}				
-		}
-		
-		mqtt_send_int(_sensors[i].topic, state); // сразу же отправим данные в топик, только если состояние изменилось
-		_sensors[i].state = state;
-		
-		// set signal led gpio
-		if ( _sensors[i].signal_gpio != NO_GPIO )
-			GPIO_ALL( _sensors[i].signal_gpio, state );		
-	}
-	
-}
+
 
 void ICACHE_FLASH_ATTR gpio_toggle_cb(void *args)
 {
@@ -224,15 +191,21 @@ void ICACHE_FLASH_ATTR led_on_cb(void *args)
 	
 	
 
-	uint8_t new_duty;
+	uint8_t new_duty = 0;
 	if ( brightness[i] == duty )
+	{
 		new_duty = brightness[i+1];
+	}
 	else	
+	{
 		new_duty = 	brightness[i];
-		
+	}
+
 	if ( new_duty > VALDES_MIN_NIGHT_BRIGTHNESS )
+	{
 		new_duty = VALDES_MIN_NIGHT_BRIGTHNESS;
-		
+	}
+
 	pwm_set_duty_iot( new_duty, _sens->pin_ch);
 		
 	pwm_start_iot();
@@ -262,6 +235,82 @@ void ICACHE_FLASH_ATTR led_off_cb(void *args)
 	os_timer_disarm(&_sens->tmr_pwm);
 	os_timer_setfn(&_sens->tmr_pwm, (os_timer_func_t *) led_off_cb, _sens);
 	os_timer_arm(&_sens->tmr_pwm, light_delay, 0);	
+}
+
+void ICACHE_FLASH_ATTR read_sensors_cb()
+{
+	// обработка состояния gpio
+	// если состояние изменилось, то выполним коллбек в зависимости от состояния, а так же запустим таймер для выключенного состояния
+	uint8_t i;
+	for (i = 0; i < USER_SENSOR_MAX; i++ )
+	{
+		uint8_t state = GPIO_ALL_GET(_sensors[i].gpio);
+		state = ( _sensors[i].active_level ) ? state : !state;
+		if ( state == _sensors[i].state ) continue;  // состояние не менялось
+	
+		//uint8_t _state = ( _sensors[i].active_level ) ? state : !state;
+		
+		// состояние изменилось, выполнить on- или off- callback
+		if ( state ) 
+		{
+			// включаем (вызываем on-callback)
+			if ( _sensors[i].on != NULL  	// функция назначена
+			     && _sensors[i].dark   		// включать только в темноте
+				 && is_dark 				// сейчас темно	
+			   )
+			{  
+				// остновить запущенный таймер (мог быть запущен)
+				os_timer_disarm(&_sensors[i].tmr);
+
+				// + включаем только в темноте, а выключаем в любое время
+				_sensors[i].on( _sensors[i].on_args );
+			}	
+		} 
+		else 
+		{
+			// выключаем либо сразу (вызываем off-callback), либо запускаем таймер
+			if ( _sensors[i].tmr_delay == 0 )
+			{
+				// вызываем off-callback (задержка запуска таймера 0)
+				if ( _sensors[i].off != NULL )
+				{
+					_sensors[i].off( _sensors[i].off_args );
+				}
+			}
+			else 
+			{
+				// запускаем таймер, off-callback не вызываем
+				if ( _sensors[i].tmr_cb != NULL )
+				{
+					// запустим таймер
+					os_timer_disarm(&_sensors[i].tmr);		
+					os_timer_setfn(&_sensors[i].tmr, (os_timer_func_t *) _sensors[i].tmr_cb, _sensors[i].tmr_args);
+					os_timer_arm(&_sensors[i].tmr, _sensors[i].tmr_delay * DELAY_MULT, 0);					
+				}				
+			}
+		}
+		
+		mqtt_send_int(_sensors[i].topic, state); // сразу же отправим данные в топик, только если состояние изменилось
+		_sensors[i].state = state;
+		
+		// set signal led gpio
+		if ( _sensors[i].signal_gpio != NO_GPIO )
+			GPIO_ALL( _sensors[i].signal_gpio, state );		
+	}
+	
+	// valdes2 - smooth led
+
+
+	if ( prev_smooth < VALDES_SMOOTH_LED )
+	{
+		led_on_cb(&smooth_sens);
+	} 
+	else if ( prev_smooth > VALDES_SMOOTH_LED )
+	{
+		led_off_cb(&smooth_sens);
+	}
+	prev_smooth = VALDES_SMOOTH_LED;
+	
 }
 
 void ICACHE_FLASH_ATTR load_options()
@@ -339,6 +388,8 @@ void ICACHE_FLASH_ATTR load_options()
 void ICACHE_FLASH_ATTR startfunc()
 {
 	// выполняется один раз при старте модуля.
+	smooth_sens.pin_ch = 0;	
+
 	uint8_t i;
 	for (i=220; i < 228; i++ ) {
 		GPIO_ALL(i, 0);

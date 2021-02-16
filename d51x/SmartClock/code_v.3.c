@@ -9,7 +9,7 @@ adc - control backlight
 mode - show other data from Interpreter via valdes:
 
 valdes[0] - режим экрана:
-    0 - основной режим - часы с днем недели
+	0 - часы с днем недели
     1 - дата (через КК)
     2 - температура в комнате (через КК или Interpreter)
     3 - температура на улице  (через КК или Interpreter)
@@ -34,7 +34,7 @@ valdes[2]   0 - нет,
 
 
 
-#define FW_VER "3.0"
+#define FW_VER "3.1"
 
 
 #define WORK_MODE           valdes[0]
@@ -51,7 +51,7 @@ valdes[2]   0 - нет,
 char* day_of_week[7] = {"пн","вт","ср","чт","пт","сб","вс"};
 char* text_month[12] = {"янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"};
 
-uint8_t mode = 0; // 0 - time, 1 - date, 2 - bedroom temp
+int8_t mode = 0; // 0 - default, 1 - time, 2 - date, 3 - bedroom temp
                     
 // #define matrix_clear_row(section, row) maxOne(section, row, 0);
 
@@ -98,15 +98,18 @@ void ICACHE_FLASH_ATTR print_date_text_month() {
     MATRIX_print (data, 1 , 0);
 }
 
-int8_t ICACHE_FLASH_ATTR round_temp(int32_t temp) 
+int8_t ICACHE_FLASH_ATTR round_temp(int16_t temp) 
+//int8_t ICACHE_FLASH_ATTR round_temp(int32_t temp) 
 {
-    if ( temp%10 <= -5) {
-        return (-1 + temp/10);
+	//int32_t t = (temp >= 0x8000 ) ? (temp-0xFFFF)-1 : temp;
+	int16_t t = temp;
+    if ( t%10 <= -5) {
+        return (-1 + t/10);
     } 
-    else if  ( temp%10 < 5) {
-        return temp/10;
+    else if  ( t%10 < 5) {
+        return t/10;
     }
-    return (1 + temp/10);
+    return (1 + t/10);
 }
 
 void ICACHE_FLASH_ATTR print_matrix(const char *template, int32_t value, uint8_t scroll)
@@ -166,7 +169,7 @@ void ICACHE_FLASH_ATTR vertical_bar(uint8_t matrix, uint8_t col, uint8_t height)
 void ICACHE_FLASH_ATTR timerfunc(uint32_t  timersrc) {
     // выполнение кода каждую 1 секунду
 
-uint32_t val = mode;
+	uint32_t val = mode;
     val = WORK_MODE;
     if (val != mode) {
         mode = val;
@@ -180,9 +183,11 @@ uint32_t val = mode;
     // выполнение кода каждые 30 секунд
     }
     
-    mode = 0;
-    if ( MODE_SPEED > 10 && MODE_DELAY > 1 )
-        {
+    
+    if ( MODE_SPEED > 0 && MODE_DELAY > 0 )
+    {
+		mode = 0;
+		
         static int i = 0;
         if ( i >= MODE_SPEED && i <= ( MODE_SPEED + MODE_DELAY ) ) 
         { 
@@ -198,18 +203,33 @@ uint32_t val = mode;
         }
         i++;
         if ( i == MODE_SPEED*3 + MODE_DELAY +1 ) i=0;    
+	
+	    switch (mode) 
+		{
+			case 0: print_time_with_day(timersrc%2); break;
+			case 1: print_date_text_month(); break;
+			case 2: print_temp_bedroom(0); break;  // спальня
+			case 3: print_temp_house(0); break;  // дом
+			case 4: print_temp_street(0); break;  // улица
+			default:
+				//print_time_with_day(timersrc%2); 
+				break;
+		}
     }
 
-    switch (mode) {
-        case 0: print_time_with_day(timersrc%2); break;
-        case 1: print_date_text_month(); break;
-        case 2: print_temp_bedroom(0); break;  // спальня
-        case 3: print_temp_house(0); break;  // дом
-        case 4: print_temp_street(0); break;  // улица
-        default:
-            print_time_with_day(timersrc%2); break;
-    }
-    
+// mtrxsec=2			// Line print: 2 sec.
+// mtrxspeed=120		// Speed print: 120 ms.
+// mtinterv=3			// Interval: 3 min.
+// replacesens(uint8_t num, char *buf)		в buf положит содержимое номера строки из конструктора строк
+// replacesens(Номер строки, куда вложить)
+// maxlines - кол-во строк в конструкторе строк
+// через uint32_t задать последовательность отображения строк по кругу
+// 1234567 - число, перевести в строку, далее по каждому элементу строки вытащить строку из конструктора и отбразить, если она не пустая
+// в строках мы в качестве шаблона указываем либо саму _переменную_, либо _VALDESX_, если требуется откругление
+// в переменные valdes мы кладем через интерпретер значения
+// как использовать свою функцию округления?
+
+
 
   // print running dot
   switch ( ANIMATE )

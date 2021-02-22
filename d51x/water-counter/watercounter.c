@@ -5,8 +5,8 @@ uint32_t ts2 = 0;
 
 #define millis() (unsigned long) (micros() / 1000ULL)
 #define GPIO_STATE_CLOSE 0
-#define GPIO_COUNTER1 3
-#define GPIO_COUNTER2 1
+//#define GPIO_COUNTER1 3
+//#define GPIO_COUNTER2 1
 
 #define COUNTER_IMPL 10
 //uint32_t counter = 0;
@@ -72,9 +72,10 @@ uint32_t ICACHE_FLASH_ATTR calcCRC32(const uint8_t *data, uint16_t sz) {
 void ICACHE_FLASH_ATTR read_gpio_cb() 
 {
 	// счетик 1
-	if ( digitalRead(GPIO_COUNTER1) == GPIO_STATE_CLOSE )
+	if ( WATERCNT1_GPIO < 16 && digitalRead(WATERCNT1_GPIO) == GPIO_STATE_CLOSE )
 	{
 		// геркон замкнут (замыкание начинается на значении бликом к 1, а размыкание на значении после 3)
+		// Сами счетчик замыкаются при переходе с 0 на 9 и размыкание происходит при переходе с 2 на 3.
 		if ( ts1 == 0 )
 		{
 			//counter++;
@@ -89,7 +90,7 @@ void ICACHE_FLASH_ATTR read_gpio_cb()
 	}
 	
 	// счетик 2
-	if ( digitalRead(GPIO_COUNTER2) == GPIO_STATE_CLOSE )
+	if ( WATERCNT2_GPIO < 16 &&  digitalRead(WATERCNT2_GPIO) == GPIO_STATE_CLOSE )
 	{
 		// геркон замкнут (замыкание начинается на значении бликом к 1, а размыкание на значении после 3)
 		if ( ts2 == 0 )

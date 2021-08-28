@@ -16,7 +16,7 @@ void alt_ssid_mode()
 
 void startfunc()
 {
-	valdes[0] = 0;
+	valdes[0] = valdes[1] = 0;
 }
 
 void timerfunc(uint32_t timersrc)
@@ -36,7 +36,7 @@ void timerfunc(uint32_t timersrc)
 		{
 			valdes[1] = 0;
 		}
-        alt_ssid_mode(); //двинем на следущий роутер
+        	alt_ssid_mode(); //двинем на следущий роутер
 	}
 	if (valdes[0] == 1100)
 	{

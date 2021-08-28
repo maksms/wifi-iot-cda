@@ -32,7 +32,7 @@ void timerfunc(uint32_t timersrc)
 	{
 		valdes[0]++;
 		valdes[1]++;
-        if (valdes[1] > 1)
+        	if (valdes[1] > 1)
 		{
 			valdes[1] = 0;
 		}

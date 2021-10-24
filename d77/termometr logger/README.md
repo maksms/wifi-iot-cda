@@ -1,30 +1,30 @@
 termometr logger
 ===========
 
-![termometr logger](Screenshot_1.png "termometr logger")
+![termometr logger](Screenshot_1.jpg "termometr logger")
 
-![termometr logger](Screenshot_2.png "termometr logger")
+![termometr logger](Screenshot_2.jpg "termometr logger")
 
-![termometr logger](Screenshot_3.png "termometr logger")
+![termometr logger](Screenshot_3.jpg "termometr logger")
 
-![termometr logger](Screenshot_4.png "termometr logger")
+![termometr logger](Screenshot_4.jpg "termometr logger")
 
-![termometr logger](Screenshot_5.png "termometr logger")
+![termometr logger](Screenshot_5.jpg "termometr logger")
 
-![termometr logger](Screenshot_6.png "termometr logger")
+![termometr logger](Screenshot_6.jpg "termometr logger")
 
-![termometr logger](Screenshot_7.png "termometr logger")
+![termometr logger](Screenshot_7.jpg "termometr logger")
 
-![termometr logger](Screenshot_8.png "termometr logger")
+![termometr logger](Screenshot_8.jpg "termometr logger")
 
-датчик ds18b20 в качестве замера температуры тела
+РґР°С‚С‡РёРє ds18b20 РІ РєР°С‡РµСЃС‚РІРµ Р·Р°РјРµСЂР° С‚РµРјРїРµСЂР°С‚СѓСЂС‹ С‚РµР»Р°
 
-корректировал по ртутному, но незначительно
+РєРѕСЂСЂРµРєС‚РёСЂРѕРІР°Р» РїРѕ СЂС‚СѓС‚РЅРѕРјСѓ, РЅРѕ РЅРµР·РЅР°С‡РёС‚РµР»СЊРЅРѕ
 
-набираетсЯ температура вначале быстро потом приходитсЯ подержать, но это к конструктиву теплосьема
+РЅР°Р±РёСЂР°РµС‚СЃРЇ С‚РµРјРїРµСЂР°С‚СѓСЂР° РІРЅР°С‡Р°Р»Рµ Р±С‹СЃС‚СЂРѕ РїРѕС‚РѕРј РїСЂРёС…РѕРґРёС‚СЃРЇ РїРѕРґРµСЂР¶Р°С‚СЊ, РЅРѕ СЌС‚Рѕ Рє РєРѕРЅСЃС‚СЂСѓРєС‚РёРІСѓ С‚РµРїР»РѕСЃСЊРµРјР°
 
-зато падает быстро, лог приделал из-за этого, чтоб не терЯть пик
+Р·Р°С‚Рѕ РїР°РґР°РµС‚ Р±С‹СЃС‚СЂРѕ, Р»РѕРі РїСЂРёРґРµР»Р°Р» РёР·-Р·Р° СЌС‚РѕРіРѕ, С‡С‚РѕР± РЅРµ С‚РµСЂРЇС‚СЊ РїРёРє
 
-пиковые вывел отдельно в свои метрики, можно смотреть через внешние сервисы
+РїРёРєРѕРІС‹Рµ РІС‹РІРµР» РѕС‚РґРµР»СЊРЅРѕ РІ СЃРІРѕРё РјРµС‚СЂРёРєРё, РјРѕР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‡РµСЂРµР· РІРЅРµС€РЅРёРµ СЃРµСЂРІРёСЃС‹
 
-код не компактил, чтобы можно было разобратьсЯ без комментированиЯ, мне сейчас не до них (covid)
+РєРѕРґ РЅРµ РєРѕРјРїР°РєС‚РёР», С‡С‚РѕР±С‹ РјРѕР¶РЅРѕ Р±С‹Р»Рѕ СЂР°Р·РѕР±СЂР°С‚СЊСЃРЇ Р±РµР· РєРѕРјРјРµРЅС‚РёСЂРѕРІР°РЅРёРЇ, РјРЅРµ СЃРµР№С‡Р°СЃ РЅРµ РґРѕ РЅРёС… (covid)

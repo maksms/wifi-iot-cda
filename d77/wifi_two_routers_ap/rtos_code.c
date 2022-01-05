@@ -6,7 +6,7 @@ void alt_ssid_mode()
 	wifi_mode_t currentMode;
 	wifi_config_t sta_config;
 	esp_wifi_get_config(WIFI_IF_STA, &sta_config);
-	os_sprintf(sta_config.sta.ssid, "%s", (valdes[1] == 0) ? "SSID_1" : "SSID_1"); //имя роутера
+	os_sprintf(sta_config.sta.ssid, "%s", (valdes[1] == 0) ? "SSID_1" : "SSID_2"); //имя роутера
 	os_sprintf(sta_config.sta.password, "%s", (valdes[1] == 0) ? "PASSWORD_1" : "PASSWORD_2");	//пароль роутера
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &sta_config));	 //применить параметры роутера
 	esp_wifi_stop();

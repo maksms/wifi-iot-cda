@@ -1,3 +1,4 @@
+// системные определения КК:
 typedef enum {
     LS_MODE_NA =0, // неизвестный датчик, только положительные (uint16_t, uint32_t)
     LS_MODE_TEMP=3, // температура
@@ -30,7 +31,18 @@ typedef enum {
     LSENS32BIT=32 // наша переменная 32 бита !!!
 } lsensmode_t;
 
+typedef enum {
+    LSENSFL0= 0,
+    LSENSFL1= 64,
+    LSENSFL2= 128,
+    LSENSFL3= 192
+} lsensflmode;
+
+
 /*
 Пример 32 битного счетчика:
 {200,LS_MODE_CNT|LSENS32BIT,"MYCOUNTER","counter",&mycounter,NULL},
+
+Пример вывода температуры с 2 знаками:
+{201,LS_MODE_TEMP|LSENSFL2,"MYTEMP","temp",&mytemp,NULL},
 */

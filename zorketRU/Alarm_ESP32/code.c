@@ -16,39 +16,39 @@
 #define gpio_read GPIO_ALL_GET
 #define gpio_write GPIO_ALL
 
-//параметры связи
-#define TEL_NUMBER 89871234567
-
-//флаг отправки sms о постановке на охрану, 0 - отправка не требуется, 1 - отправка требуется
-bool sms_state_alarm_on = 1;
-
-//переменная с текстом для отправки
-////uint32_t smstext = defaulttext;
-
 
 void startfunc() { // выполняется один раз при старте модуля.
+
 }
 
 void timerfunc(uint32_t  timersrc) {// выполнение кода каждую 1 секунду
 
 	//Светодиод на считывателе
 	//Если на охране(1) - led синий(1), если снято с охраны - зеленый(0)
-	if(gpio_read(ZAMOK) == 1) gpio_write(LED, 1);
-	else gpio_write(LED, 0);
+	if(gpio_read(ZAMOK) == 1)
+		gpio_write(LED, 1);
+	else
+		gpio_write(LED, 0);
 
-	/*Отправляем SMS о постановке/снятии с охраны
-	    if(gpio_read(ZAMOK) == 1 && sms_state_alarm_on == 1)
-	    {
-	        smstext == "Test1";
-	        send_sms(TEL_NUMBER,smstext);
-	        delay(20);
-	        sms_state_alarm_on = 0;
-	    }
-	    else
-	    {
-	        sms_state_alarm_on = 1;
-	    }
-	*/
+	//Отправляем SMS о постановке/снятии с охраны
+	uint8_t smsstatealarmon;
+	read_24cxx(0x50, 100, (uint8_t *)&smsstatealarmon, 1);
+
+	if(gpio_read(ZAMOK) == 1 && smsstatealarmon == 1)
+	{
+		char datasms[] = "AlarmON";
+		sms_send(sensors_param.tel, datasms);
+
+		smsstatealarmon = 0;
+		write_24cxx(0x50, 100, (uint8_t *)&smsstatealarmon, 1);
+	}
+	else
+	{
+		smsstatealarmon = 1;
+		write_24cxx(0x50, 100, (uint8_t *)&smsstatealarmon, 1);
+	}
+
+
 	if(timersrc % 30 == 0) { // выполнение кода каждые 30 секунд
 	}
 	delay(10); // обязательная строка, минимальное значение для RTOS систем- 10мс

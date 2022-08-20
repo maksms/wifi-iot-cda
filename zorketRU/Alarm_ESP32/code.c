@@ -15,85 +15,137 @@
 #define gpio_read GPIO_ALL_GET
 #define gpio_write GPIO_ALL
 
-//переменная уведомления сиреной об открытии-закрытии замка, ячейка 60
-//код 11 - "уведомление о закрытии уже прозвучало, пи не требуется"
-//код 22 - "уведомление об открытии уже прозвучало, пи-пи не требуется"
-uint8_t state_pipi;
+uint32_t ticker_1s = 0; //тикер запуска 1-секундного кода
+uint32_t ticker_30s = 0; //тикер запуска 30-секундного кода
 
-//переменные состояний отправки
+/*================================================================================================================================================*/
+/*================================================================================================================================================*/
 
-//замок, ячейка 50
-//код 55 - "сообщение о закрытии уже отправлено, отправка не требуется"
-//код 77 - "сообщение об открытии уже отправлено, отправка не требуется"
-uint8_t state_zamok;
 
-void startfunc() { // выполняется один раз при старте модуля.
+//=========   НАСТРОЙКИ   =========================================================================================================================
+#define offtime sensors_param.cfgdes[0] //время для автопостановки на охрану, минуты
+#define warning_offtime 5 //время для возврата в режим охраны после сработки
+//=========   НАСТРОЙКИ   =========================================================================================================================
 
+
+uint8_t current_mode = 112; //текущий режим работы, 111 - закрыто, 112 - открыто, 113 - тревога
+
+//=========   ТАЙМЕРЫ   =========================================================================================================================
+bool motion; //наличие движения в настоящий момент времени
+
+TimerHandle_t motion_detect_timer; //создаем таймер присмотра за датчиками
+void vMotionDetectTimerCallback(TimerHandle_t xTimer) { //следим за датчиками
+	if(gpio_read(MOTION_MANAGER) == 0 || gpio_read(MOTION_ZAL) == 0 || gpio_read(GERKON_DVER) == 0) {
+		motion = 1;
+	}
+	else {
+		motion = 0;
+	}
 }
 
-void timerfunc(uint32_t  timersrc) {// выполнение кода каждую 1 секунду
+uint32_t motion_off_sec_all; //общее количество секунд без движения, сбрасывается после накопления ~18ч
+uint8_t motion_off_sec;
+uint8_t motion_off_min;
+uint16_t motion_off_hour;
 
-	//Светодиод на считывателе
-	//Если замок закрыт(1) - led синий(1), если замок открыт - зеленый(0), жестко привязываем цвет диода к состоянию замка
-	if(gpio_read(ZAMOK) == 1 && gpio_read(LED) != 1)
+TimerHandle_t motion_off_timer; //создаем таймер отсутствия движения motion_off_timer
+void vMotionOffTimerCallback(TimerHandle_t xTimer) { //функция обратного вызова таймера
+	if(motion == 0) { //если нет движения - прибавляем секунду
+		motion_off_sec_all++;
+	}
+	else {
+		motion_off_sec_all = 0;//если было движение - сбрасываем на ноль
+	}
+	motion_off_sec = (motion_off_sec_all % 3600ul) % 60ul;
+	motion_off_min = (motion_off_sec_all % 3600ul) / 60ul;
+	motion_off_hour = (motion_off_sec_all / 3600ul);
+}
+
+//=========   ТАЙМЕРЫ   =========================================================================================================================
+
+
+
+
+//=========   ФУНКЦИИ   =========================================================================================================================
+
+void AutoAlarm() {  //автоматическая постановка на охрану, если нет движения в течении времени offtime
+	if(motion_off_sec_all >= (offtime * 60) && current_mode == 112)
+	{
+		current_mode = 111;
+	}
+}
+
+void ModeHandler(){ //что делать в том или ином режиме
+	if(current_mode == 111)
+	{
 		gpio_write(LED, 1);
+		gpio_write(ZAMOK, 1);
+	}
 
-	if(gpio_read(ZAMOK) == 0 && gpio_read(LED) != 0)
+	if(current_mode == 112)
+	{
 		gpio_write(LED, 0);
+		gpio_write(ZAMOK, 0);
+	}
+}
 
-	//Пищим сиреной при открытии-закрытии замка
-	read_24cxx(0x50, 60, (uint8_t *)&state_pipi, 1);
+void SendMessage(){ //отправляем уведомления
 	
-	if(gpio_read(ZAMOK) == 1 && state_pipi != 11)
-	{
-		gpio_write(SIRENA, 1);
-		delay(10);
-		gpio_write(SIRENA, 0);
-		state_pipi = 11;
-		write_24cxx(0x50, 60, (uint8_t *)&state_pipi, 1);
-	}
-
-	if(gpio_read(ZAMOK) == 0 && state_pipi == 11)
-	{
-		gpio_write(SIRENA, 1);
-		delay(10);
-		gpio_write(SIRENA, 0);
-		delay(200);
-		gpio_write(SIRENA, 1);
-		delay(10);
-		gpio_write(SIRENA, 0);
-		state_pipi = 22;
-		write_24cxx(0x50, 60, (uint8_t *)&state_pipi, 1);
-	}
+}
+//=========   ФУНКЦИИ   =========================================================================================================================
 
 
-	//Отправляем SMS о изменении состояния замка
-	read_24cxx(0x50, 50, (uint8_t *)&state_zamok, 1);
+
+void startfunc() {
+	// выполняется один раз при старте модуля.
 	
-	if(gpio_read(ZAMOK) == 1 && state_zamok != 55)
-	{
-		char datasms[] = " #Магазин_замок_ЗАКРЫТ";
-		sms_send(sensors_param.tel, datasms);
-		//      sendtelegramm(datasms);
-		state_zamok = 55;
-		write_24cxx(0x50, 50, (uint8_t *)&state_zamok, 1);
+	// запуск таймера контроля датчиков, 2 раза в секунду
+	motion_detect_timer = xTimerCreate("Motion Detect Timer", pdMS_TO_TICKS(1 * 500), pdTRUE, 0, vMotionDetectTimerCallback);
+	BaseType_t c = xTimerStart(motion_detect_timer, 0); //запуск циклического таймера
+
+	// запуск таймера отсутствия движения, запуск 1 раз в секунду
+	motion_off_timer = xTimerCreate("Motion Off Timer", pdMS_TO_TICKS(1 * 1000), pdTRUE, 0, vMotionOffTimerCallback);
+	BaseType_t b = xTimerStart(motion_off_timer, 0); //запуск циклического таймера
+}
+
+void timerfunc(uint32_t  timersrc) {
+	// выполнение кода каждую 1 секунду
+	ticker_1s++; //тикер запусков кода
+	AutoAlarm();
+	ModeHandler();
+
+
+	/*if(gpio_read(16) == 1) current_mode = 111;
+	if(gpio_read(16) == 0) current_mode = 112;*/
+
+	if(timersrc % 30 == 0) {
+		// выполнение кода каждые 30 секунд
+		ticker_30s++; //тикер запусков
+
 	}
 
-	if(gpio_read(ZAMOK) == 0 && state_zamok == 55)
-	{
-		char datasms[] = " #Магазин_замок_ОТКРЫТ";
-		sms_send(sensors_param.tel, datasms);
-		//      sendtelegramm(datasms);
-		state_zamok = 77;
-		write_24cxx(0x50, 50, (uint8_t *)&state_zamok, 1);
-	}
-
-	if(timersrc % 30 == 0) { // выполнение кода каждые 30 секунд
-	}
-	delay(10); // обязательная строка, минимальное значение для RTOS систем- 10мс
+	delay(1000); // обязательная строка, минимальное значение для RTOS систем- 10мс
 }
 void webfunc(char *pbuf) {
 	os_sprintf(HTTPBUFF, "<b>Система охранной сигнализации<br>"); // вывод данных на главной модуля
-	os_sprintf(HTTPBUFF, "<b>Переменная state_zamok ячейка50 содержит uint8_t значение %d, а последнее sms справа %s<br>", state_zamok, datasms); // вывод данных на главной модуля
-	os_sprintf(HTTPBUFF, "Текст строки 3<br>"); // вывод данных на главной модуля
+	os_sprintf(HTTPBUFF, "<b>-------------------------------------------------<br>");
+	os_sprintf(HTTPBUFF, "<b>Движение отсутствует: %d сек<br>", motion_off_sec_all);
+	os_sprintf(HTTPBUFF, "<b>Текущий режим: %d<br>", current_mode);
+	os_sprintf(HTTPBUFF, "<b>   <br>");
+	os_sprintf(HTTPBUFF, "<b>   <br>");
+	os_sprintf(HTTPBUFF, "<b>Текущие настройки сигнализации:<br>");
+	os_sprintf(HTTPBUFF, "<b>===============================<br>");
+	os_sprintf(HTTPBUFF, "<b> Автопостановка при бездействии, мин: %d<br>", offtime);
+	os_sprintf(HTTPBUFF, "<b>   <br>");
+	os_sprintf(HTTPBUFF, "<b>   <br>");
+	os_sprintf(HTTPBUFF, "<b>Отладочная информация:<br>");
+	os_sprintf(HTTPBUFF, "<b>===============================<br>");
+	os_sprintf(HTTPBUFF, "<b>1-секундных запусков кода: %d<br>", ticker_1s);
+	os_sprintf(HTTPBUFF, "<b>30-секундных запусков кода: %d<br>", ticker_30s);
+	os_sprintf(HTTPBUFF, "<b>wiegandserialNumber: %d<br>", wiegandserialNumber);
+	os_sprintf(HTTPBUFF, "<b>wiegandsiteCode: %d<br>", wiegandsiteCode);
+	os_sprintf(HTTPBUFF, "<b>motion_off_sec: %d<br>", motion_off_sec);
+	os_sprintf(HTTPBUFF, "<b>motion_off_min: %d<br>", motion_off_min);
+	os_sprintf(HTTPBUFF, "<b>motion_off_hour: %d<br>", motion_off_hour);
+
 }

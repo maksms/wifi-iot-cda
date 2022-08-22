@@ -15,9 +15,6 @@ const uint8_t RELAY_DYM = 26;
 #define gpio_read GPIO_ALL_GET
 #define gpio_write GPIO_ALL
 
-uint32_t ticker_1s = 0; //тикер запуска 1-секундного кода
-uint32_t ticker_30s = 0; //тикер запуска 30-секундного кода
-
 /*================================================================================================================================================*/
 /*================================================================================================================================================*/
 
@@ -29,6 +26,34 @@ bool simplekey_ok;
 bool key_error;
 uint32_t wiegandkey;
 uint32_t key_error_info;
+uint32_t uptime_second;
+
+
+bool text_mode_open_flag;
+bool text_mode_close_flag;
+bool text_mode_autoclose_flag;
+bool text_mode_warning_flag;
+bool text_door_open_flag;
+bool text_door_close_flag;
+bool text_money_close_flag;
+bool text_money_open_flag;
+bool text_siren_on_flag;
+bool text_siren_off_flag;
+bool text_smoke_on_flag;
+bool text_smoke_off_flag;
+bool text_energy_on_flag;
+bool text_energy_off_flag;
+bool text_internet_on_flag;
+bool text_internet_off_flag;
+bool text_motion_zal_on_flag;
+bool text_motion_zal_off_flag;
+bool text_motion_manager_on_flag;
+bool text_motion_manager_off_flag;
+bool text_relay_dym_off_flag;
+bool text_relay_dym_on_flag;
+bool text_inet_off_flag;
+bool text_inet_on_flag;
+
 
 #define masterkey1 sensors_param.cfgdes[1]
 #define masterkey2 sensors_param.cfgdes[2]
@@ -37,8 +62,8 @@ uint32_t key_error_info;
 #define simplekey3 sensors_param.cfgdes[5]
 #define opentime sensors_param.cfgdes[6]
 #define closetime sensors_param.cfgdes[7]
-#define simpleopentime sensors_param.cfgdes[8]
-#define simpleclosetime sensors_param.cfgdes[9]
+#define simplekeyopentime sensors_param.cfgdes[8]
+#define simplekeyclosetime sensors_param.cfgdes[9]
 
 
 //=========   НАСТРОЙКИ   =========================================================================================================================
@@ -68,6 +93,8 @@ const char *text_motion_manager_on = "Движение_в_зоне_менедж�
 const char *text_motion_manager_off = "Движения_в_зоне_менеджера_нет";
 const char *text_relay_dym_off = "Датчик_дыма_выключен";
 const char *text_relay_dym_on = "Датчик_дыма_включен";
+const char *text_inet_off = "Интернет отсутствует";
+const char *text_inet_on = "Интернет работает";
 
 
 
@@ -156,12 +183,13 @@ void SendHandler() { //отправляем уведомления
 		else
 			if(sendmode == 102) {
 				//  отправляем смс и телеграм
-				sms_send(sensors_param.tel, datasms);
 				sendtelegramm();
+				sms_send(sensors_param.tel, datasms);
 			}
 			else {
 				sendmode = 200;
 			}
+	sendmode = 200;
 }
 
 void SendSMS() {
@@ -212,9 +240,9 @@ void WiegandHandler() {
 			key_error_info = 0;
 		}
 	}
-	
 
-	if((masterkey_ok == 1 || (simplekey_ok ==1 && (time_loc.hour >= simpleopentime && time_loc.hour <= simpleclosetime))) && current_mode == 111) {
+
+	if((masterkey_ok == 1 || (simplekey_ok == 1 && (time_loc.hour >= simplekeyopentime && time_loc.hour <= simplekeyclosetime))) && current_mode == 111) {
 		current_mode = 112;
 		masterkey_ok = 0;
 		simplekey_ok = 0;
@@ -222,7 +250,7 @@ void WiegandHandler() {
 		wiegandserialNumber = 0;
 	}
 
-	if((masterkey_ok == 1 || simplekey_ok ==1) && current_mode == 112) {
+	if((masterkey_ok == 1 || simplekey_ok == 1) && current_mode == 112) {
 		current_mode = 111;
 		masterkey_ok = 0;
 		simplekey_ok = 0;
@@ -230,7 +258,7 @@ void WiegandHandler() {
 		wiegandserialNumber = 0;
 	}
 
-	if((masterkey_ok == 1 || simplekey_ok ==1) && current_mode == 113) {
+	if((masterkey_ok == 1 || simplekey_ok == 1) && current_mode == 113) {
 		current_mode = 111;
 		masterkey_ok = 0;
 		simplekey_ok = 0;
@@ -239,6 +267,33 @@ void WiegandHandler() {
 	}
 }
 
+void InternetWatchDogSend() {
+
+	if(uptime_second > 40 && !pingprint && !text_inet_off_flag) { //если нет интернета
+		os_sprintf(datasms, text_inet_off);
+		SendAll();
+		text_inet_off_flag = 1;
+		text_inet_on_flag = 0;
+	}
+
+	if(uptime_second > 40 && pingprint && !text_inet_on_flag) { //если интернет появился
+		os_sprintf(datasms, text_inet_on);
+		SendAll();
+		text_inet_on_flag = 1;
+		text_inet_off_flag = 0;
+	}
+}
+
+void StarterSend() { //на 10 секунде аптайма отправляем сообщения о включении прибора
+	if(uptime_second == 30) {
+		os_sprintf(datasms, " #Магазин_ПРИБОР_СИГНАЛИЗАЦИИ_запущен %u секунд назад", uptime_second);
+		SendAll();
+	}
+}
+
+void UpTimeSecondMath() {
+	uptime_second = timer_uptime.day * 3600 * 24 + timer_uptime.hour * 3600 + timer_uptime.min * 60 + timer_uptime.sec; //время работы модуля в секундах
+}
 
 
 //=========   ОСНОВНОЙ КОД    ===================================================================================================================
@@ -253,47 +308,60 @@ void startfunc() {
 	motion_off_timer = xTimerCreate("Motion Off Timer", pdMS_TO_TICKS(1 * 1000), pdTRUE, 0, vMotionOffTimerCallback);
 	BaseType_t b = xTimerStart(motion_off_timer, 0); //запуск циклического таймера
 
-	//отправляем уведомление о включении прибора
-	delay(1000);
-	os_sprintf(datasms, " #Магазин_ПРИБОР_СИГНАЛИЗАЦИИ_ВКЛЮЧЕН");
-	SendAll();
 }
 
 void timerfunc(uint32_t  timersrc) {
 	// выполнение кода каждую 1 секунду
-	ticker_1s++; //тикер запусков кода
+	UpTimeSecondMath();
+	StarterSend();
 	AutoAlarm();
 	ModeHandler();
 	WiegandHandler();
+	InternetWatchDogSend();
+
+
 
 
 	if(timersrc % 30 == 0) {
 		// выполнение кода каждые 30 секунд
-		ticker_30s++; //тикер запусков
+
+
 
 	}
-
 	delay(50); // обязательная строка, минимальное значение для RTOS систем- 10мс
 }
 void webfunc(char *pbuf) {
 	os_sprintf(HTTPBUFF, "<b>Система охранной сигнализации<br>"); // вывод данных на главной модуля
-	os_sprintf(HTTPBUFF, "<b>---------------------------------------------------------------------<br>");
-	if(current_mode == 111) {os_sprintf(HTTPBUFF, "<b>Текущий режим: На охране (закрыто)<br>");}
-	if(current_mode == 112) {os_sprintf(HTTPBUFF, "<b>Текущий режим: Снято с охраны (открыто)<br>");}
-	if(current_mode == 113) {os_sprintf(HTTPBUFF, "<b>Текущий режим: ТРЕВОГА<br>");}
+	os_sprintf(HTTPBUFF, "<b>==============================================<br>");
+	if(current_mode == 111) {
+		os_sprintf(HTTPBUFF, "<b>Текущий режим: На охране (закрыто)<br>");
+	}
+	if(current_mode == 112) {
+		os_sprintf(HTTPBUFF, "<b>Текущий режим: Снято с охраны (открыто)<br>");
+	}
+	if(current_mode == 113) {
+		os_sprintf(HTTPBUFF, "<b>Текущий режим: ТРЕВОГА<br>");
+	}
 	os_sprintf(HTTPBUFF, "<b>Движение отсутствует: %d ч %d мин %d сек<br>", motion_off_hour, motion_off_min, motion_off_sec);
-	if(current_mode != 111) {os_sprintf(HTTPBUFF, "<b>Авто-постановка на охрану через: %d мин %d сек<br>", auto_alarm_offtime_min, auto_alarm_offtime_sec);}
+	if(current_mode != 111) {
+		os_sprintf(HTTPBUFF, "<b>Авто-постановка на охрану через: %d мин %d сек<br>", auto_alarm_offtime_min, auto_alarm_offtime_sec);
+	}
 	os_sprintf(HTTPBUFF, "<b>   <br>");
 	os_sprintf(HTTPBUFF, "<b>   <br>");
-	os_sprintf(HTTPBUFF, "<b>Текущие настройки сигнализации:<br>");
-	os_sprintf(HTTPBUFF, "<b>===============================<br>");
-	os_sprintf(HTTPBUFF, "<b> Автопостановка при бездействии, мин: %d<br>", offtime);
 	os_sprintf(HTTPBUFF, "<b>   <br>");
 	os_sprintf(HTTPBUFF, "<b>   <br>");
-	os_sprintf(HTTPBUFF, "<b>Номер неизвестного ключа: %d<br>", key_error_info);
-	os_sprintf(HTTPBUFF, "<b>===============================<br>");
-	os_sprintf(HTTPBUFF, "<b>pingprint: %d<br>", pingprint);
+	if(key_error_info != 0) {
+		os_sprintf(HTTPBUFF, "<b>Номер неизвестного ключа: %d<br>", key_error_info);
+	}
+	os_sprintf(HTTPBUFF, "<b>----------------------------------------------<br>");
+	if(pingprint) {
+		os_sprintf(HTTPBUFF, "<b>Интернет есть<br>");
+	}
+	else {
+		os_sprintf(HTTPBUFF, "<b>Интернет отсутствует<br>");
+	}
+	os_sprintf(HTTPBUFF, "<b>uptime_second: %d<br>", uptime_second);
 	//os_sprintf(HTTPBUFF,"<button type='button' onclick='func(112);repage()' style='width:130px;height:20px'><b>Снять с охраны</b></button>");
-    //os_sprintf(HTTPBUFF,"<button type='button' onclick='func(111);repage()' style='width:130px;height:20px'><b>Поставить на охрану</b></button>");
+	//os_sprintf(HTTPBUFF,"<button type='button' onclick='func(111);repage()' style='width:130px;height:20px'><b>Поставить на охрану</b></button>");
 	//os_sprintf(HTTPBUFF,"function func(current_mode){request.open('GET', 'gpio?st=2&pin='+pinSet, true);request.onreadystatechange = reqReadyStateChange;request.send();}");
 }

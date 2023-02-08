@@ -71,30 +71,30 @@ bool text_inet_on_flag;
 #define warning_offtime 5 //время для возврата в режим охраны после сработки
 
 //тексты сообщений
-const char *text_mode_open = "Магазин_снят_с_охраны";
-const char *text_mode_close = "Магазин_поставлен_на_охрану";
-const char *text_mode_autoclose = "Автоматическая_постановка_на_охрану";
-const char *text_mode_warning = "Магазин_ТРЕВОГА";
-const char *text_door_open = "Дверь_открыта";
-const char *text_door_close = "Дверь_закрыта";
-const char *text_money_close = "Касса_закрыта";
-const char *text_money_open = "Касса_открыта";
-const char *text_siren_on = "Сирена_включена";
-const char *text_siren_off = "Сирена_выключена";
-const char *text_smoke_on = "ВНИМАНИЕ!_ЗАДЫМЛЕНИЕ!";
-const char *text_smoke_off = "Задымление отсутствует";
-const char *text_energy_on = "Электроэнергия_включена";
-const char *text_energy_off = "Электроэнергия_отсутствует";
-const char *text_internet_on = "Интернет_появился";
-const char *text_internet_off = "Интернет_отсутствует!";
-const char *text_motion_zal_on = "Движение_в_зале";
-const char *text_motion_zal_off = "Движения_в_зале_нет";
-const char *text_motion_manager_on = "Движение_в_зоне_менеджера";
-const char *text_motion_manager_off = "Движения_в_зоне_менеджера_нет";
-const char *text_relay_dym_off = "Датчик_дыма_выключен";
-const char *text_relay_dym_on = "Датчик_дыма_включен";
-const char *text_inet_off = "Интернет отсутствует";
-const char *text_inet_on = "Интернет работает";
+const char *text_mode_open = "Текст";
+const char *text_mode_close = "Текст";
+const char *text_mode_autoclose = "Текст";
+const char *text_mode_warning = "Текст";
+const char *text_door_open = "Текст";
+const char *text_door_close = "Текст";
+const char *text_money_close = "Текст";
+const char *text_money_open = "Текст";
+const char *text_siren_on = "Текст";
+const char *text_siren_off = "Текст";
+const char *text_smoke_on = "Текст";
+const char *text_smoke_off = "Текст";
+const char *text_energy_on = "Текст";
+const char *text_energy_off = "Текст";
+const char *text_internet_on = "Текст";
+const char *text_internet_off = "Текст";
+const char *text_motion_zal_on = "Текст";
+const char *text_motion_zal_off = "Текст";
+const char *text_motion_manager_on = "Текст";
+const char *text_motion_manager_off = "Текст";
+const char *text_relay_dym_off = "Текст";
+const char *text_relay_dym_on = "Текст";
+const char *text_inet_off = "Текст";
+const char *text_inet_on = "Текст";
 
 
 

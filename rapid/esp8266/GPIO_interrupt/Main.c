@@ -4,7 +4,6 @@ uint8_t EN=14;
 uint8_t SCK=13;
 uint8_t DATA=12;
 uint8_t b;
-uint8_t w;
 
 os_timer_t DebounceTimer;
 LOCAL void input_intr_handler(void *arg);
